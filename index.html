@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <link href="/resources/images/twgljs-icon.png" rel="shortcut icon" type="image/png">
 
     <title>3d cube</title>
     <style>
@@ -67,6 +66,7 @@ varying vec3 v_surfaceToView;
 uniform vec4 u_lightColor;
 uniform vec4 u_ambient;
 uniform sampler2D u_diffuse;
+uniform sampler2D u_normal;
 uniform vec4 u_specular;
 uniform float u_shininess;
 uniform float u_specularFactor;
@@ -79,7 +79,11 @@ vec4 lit(float l ,float h, float m) {
 }
 
 void main() {
+  
   vec4 diffuseColor = texture2D(u_diffuse, v_texCoord);
+  vec4 normalColor = texture2D(u_normal, v_texCoord);
+
+
   vec3 a_normal = normalize(v_normal);
   vec3 surfaceToLight = normalize(v_surfaceToLight);
   vec3 surfaceToView = normalize(v_surfaceToView);
@@ -90,7 +94,9 @@ void main() {
   u_lightColor * (diffuseColor * litR.y + diffuseColor * u_ambient +
                 u_specular * litR.z * u_specularFactor)).rgb,
       diffuseColor.a);
-  gl_FragColor = outColor;
+
+      
+  gl_FragColor = normalColor;
 }
   </script>
     <script src="bundle.js"></script>

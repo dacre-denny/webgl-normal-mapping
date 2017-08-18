@@ -1,15 +1,41 @@
 import twgl from './node_modules/twgl.js/dist/3.x/twgl-full.js'
 
 const m4 = twgl.m4;
+const v3 = twgl.v3;
 const gl = twgl.getWebGLContext(document.getElementById("c"));
 const programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
+
+const textures = twgl.createTextures(gl, {
+
+    color : { 
+        mag: gl.NEAREST,
+        min: gl.LINEAR,
+        src: "textures/sand_color.jpg" 
+    },  
+    normal : { 
+        mag: gl.NEAREST,
+        min: gl.LINEAR,
+        src: "textures/sand_normal.jpg" 
+    }
+})
 
 const arrays = {
   position: [1, 1, -1, 1, 1, 1, 1, -1, 1, 1, -1, -1, -1, 1, 1, -1, 1, -1, -1, -1, -1, -1, -1, 1, -1, 1, 1, 1, 1, 1, 1, 1, -1, -1, 1, -1, -1, -1, -1, 1, -1, -1, 1, -1, 1, -1, -1, 1, 1, 1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, 1, 1, -1, 1, -1, -1, -1, -1, -1],
   normal:   [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1],
+  //u: [], v: [],
   texcoord: [1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1],
   indices:  [0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 8, 10, 11, 12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23],
 };
+
+for(var i = 0; i < arrays.position.length; i += 9) {
+
+    // var va = arays.position[i];
+    // var vb = arays.position[i + 3];
+    
+    // v3.cross(va, vb)
+
+}
+
 const bufferInfo = twgl.createBufferInfoFromArrays(gl, arrays);
 
 const tex = twgl.createTexture(gl, {
@@ -30,11 +56,12 @@ const uniforms = {
   u_specular: [1, 1, 1, 1],
   u_shininess: 50,
   u_specularFactor: 1,
-  u_diffuse: tex,
+  u_diffuse: textures.color,
+  u_normal: textures.normal
 };
 
 function render(time) {
-  time *= 0.001;
+  time *= 0.0001;
   twgl.resizeCanvasToDisplaySize(gl.canvas);
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
