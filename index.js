@@ -29,8 +29,8 @@ const arrays = {
 
 for(var i = 0; i < arrays.position.length; i += 9) {
 
-    // var va = arays.position[i];
-    // var vb = arays.position[i + 3];
+     var va = arays.position[i];
+     var vb = arays.position[i + 3];
     
     // v3.cross(va, vb)
 
