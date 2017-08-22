@@ -22,17 +22,28 @@ const textures = twgl.createTextures(gl, {
 const arrays = {
   position: [1, 1, -1, 1, 1, 1, 1, -1, 1, 1, -1, -1, -1, 1, 1, -1, 1, -1, -1, -1, -1, -1, -1, 1, -1, 1, 1, 1, 1, 1, 1, 1, -1, -1, 1, -1, -1, -1, -1, 1, -1, -1, 1, -1, 1, -1, -1, 1, 1, 1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, 1, 1, -1, 1, -1, -1, -1, -1, -1],
   normal:   [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1],
-  //u: [], v: [],
+  tangent: [],
   texcoord: [1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1],
   indices:  [0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 8, 10, 11, 12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23],
 };
+ 
+for(var i = 0; i < arrays.indices.length; i += 3) {
+  
+  const ia = arrays.indices[i + 0]
+  const ib = arrays.indices[i + 1] 
+  const ic = arrays.indices[i + 2] 
+  
+  const va = v3.create(arrays.position[ia * 3 + 0],arrays.position[ia * 3 + 1],arrays.position[ia * 3 + 2]);
+  const vb = v3.create(arrays.position[ib * 3 + 0],arrays.position[ib * 3 + 1],arrays.position[ib * 3 + 2]);
+  
+  const n = v3.create(arrays.normal[ia * 3 + 0],arrays.normal[ia * 3 + 1],arrays.normal[ia * 3 + 2]);
+  
+  var s = v3.cross(vb, va)
+  var t = v3.cross(s, n)
 
-for(var i = 0; i < arrays.position.length; i += 9) {
-
-    // var va = arays.position[i];
-    // var vb = arays.position[i + 3];
-    
-    // v3.cross(va, vb)
+  arrays.tangent[ ia ] = t[ 0 ]  
+  arrays.tangent[ ia ] = t[ 1 ]  
+  arrays.tangent[ ia ] = t[ 2 ]  
 
 }
 
