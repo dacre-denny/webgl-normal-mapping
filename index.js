@@ -16,36 +16,15 @@ const textures = twgl.createTextures(gl, {
         mag: gl.NEAREST,
         min: gl.LINEAR,
         src: "textures/sand_normal.jpg" 
-    }
+    } 
 })
 
 const arrays = {
   position: [1, 1, -1, 1, 1, 1, 1, -1, 1, 1, -1, -1, -1, 1, 1, -1, 1, -1, -1, -1, -1, -1, -1, 1, -1, 1, 1, 1, 1, 1, 1, 1, -1, -1, 1, -1, -1, -1, -1, 1, -1, -1, 1, -1, 1, -1, -1, 1, 1, 1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, 1, 1, -1, 1, -1, -1, -1, -1, -1],
   normal:   [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1],
-  tangent: [],
   texcoord: [1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1],
   indices:  [0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 8, 10, 11, 12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23],
 };
- 
-for(var i = 0; i < arrays.indices.length; i += 3) {
-  
-  const ia = arrays.indices[i + 0]
-  const ib = arrays.indices[i + 1] 
-  const ic = arrays.indices[i + 2] 
-  
-  const va = v3.create(arrays.position[ia * 3 + 0],arrays.position[ia * 3 + 1],arrays.position[ia * 3 + 2]);
-  const vb = v3.create(arrays.position[ib * 3 + 0],arrays.position[ib * 3 + 1],arrays.position[ib * 3 + 2]);
-  
-  const n = v3.create(arrays.normal[ia * 3 + 0],arrays.normal[ia * 3 + 1],arrays.normal[ia * 3 + 2]);
-  
-  var s = v3.cross(vb, va)
-  var t = v3.cross(s, n)
-
-  arrays.tangent[ ia ] = t[ 0 ]  
-  arrays.tangent[ ia ] = t[ 1 ]  
-  arrays.tangent[ ia ] = t[ 2 ]  
-
-}
 
 const bufferInfo = twgl.createBufferInfoFromArrays(gl, arrays);
 
@@ -72,7 +51,7 @@ const uniforms = {
 };
 
 function render(time) {
-  time *= 0.0001;
+  time *= 0.0005;
   twgl.resizeCanvasToDisplaySize(gl.canvas);
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
@@ -85,14 +64,14 @@ function render(time) {
   const zNear = 0.5;
   const zFar = 10;
   const projection = m4.perspective(fov, aspect, zNear, zFar);
-  const eye = [1, 4, -6];
+  const eye = [1, Math.sin(time) * 4, -6];
   const target = [0, 0, 0];
   const up = [0, 1, 0];
 
   const camera = m4.lookAt(eye, target, up);
   const view = m4.inverse(camera);
   const viewProjection = m4.multiply(projection, view);
-  const world = m4.rotationY(time);
+  const world = m4.rotationY(time); //time
 
   uniforms.u_viewInverse = camera;
   uniforms.u_world = world;
