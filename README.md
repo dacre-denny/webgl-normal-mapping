@@ -1,1 +1,1 @@
-# webgl2-experiments
+# webgl-normal-mapping
