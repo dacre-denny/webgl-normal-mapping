@@ -5007,7 +5007,7 @@ async function main() {
     return;
   }
 
-  var texture = 0; //await textures.loadTexture(gl, './decal.png')
+  var texture = await textures.loadTexture(gl, './decal.png');
 
   var shaderProgram = await shader.loadProgram(gl, './basic.vs', './basic.fs');
   var programInfo = {
@@ -7701,6 +7701,7 @@ async function loadTexture(gl, url) {
     await new Promise(function (resolve, reject) {
 
         var image = new Image();
+        image.crossOrigin = "anonymous";
 
         image.onerror = function (err) {
             reject(err);
