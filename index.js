@@ -5,16 +5,17 @@ import * as shader from './shader'
 
 function initBuffers(gl) {
 
-  const positions = [-1.0, 1.0,
-    1.0, 1.0, -1.0, -1.0,
-    1.0, -1.0,
+  const positions = [-1.0, 1.0, 0.0,
+    1.0, 1.0, 0.5, -1.0, -1.0, 0.0,
+    1.0, -1.0, -0.1
   ];
 
-  const positionBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER,
-    new Float32Array(positions),
-    gl.STATIC_DRAW);
+  const uvs = [
+    0.0, 1.0,
+    1.0, 1.0,
+    0.0, 0.0,
+    1.0, 0.0,
+  ];
 
   const colors = [
     0.0, 1.0, 0.0, 1.0,
@@ -23,15 +24,28 @@ function initBuffers(gl) {
     0.0, 1.0, 1.0, 1.0,
   ];
 
+  const positionBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER,
+    new Float32Array(positions),
+    gl.STATIC_DRAW);
+
   const colorBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
   gl.bufferData(gl.ARRAY_BUFFER,
     new Float32Array(colors),
     gl.STATIC_DRAW);
 
+  const uvBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER,
+    new Float32Array(uvs),
+    gl.STATIC_DRAW);
+
   return {
     position: positionBuffer,
     color: colorBuffer,
+    uv: uvBuffer,
   };
 }
 
@@ -53,7 +67,7 @@ function drawScene(gl, programInfo, buffers, time) {
     aspect,
     zNear,
     zFar);
- 
+
   const modelViewMatrix = mat4.create();
   mat4.translate(modelViewMatrix,
     modelViewMatrix, [-0.0, 0.0, -6.0]);
@@ -64,7 +78,7 @@ function drawScene(gl, programInfo, buffers, time) {
   mat4.mul(modelViewMatrix, modelRotation, modelViewMatrix)
 
   {
-    const numComponents = 2;
+    const numComponents = 3;
     const type = gl.FLOAT;
     const normalize = false;
     const stride = 0;
@@ -90,14 +104,32 @@ function drawScene(gl, programInfo, buffers, time) {
     const offset = 0;
     gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color);
     gl.vertexAttribPointer(
-        programInfo.attribLocations.vertexColor,
-        numComponents,
-        type,
-        normalize,
-        stride,
-        offset);
+      programInfo.attribLocations.vertexColor,
+      numComponents,
+      type,
+      normalize,
+      stride,
+      offset);
     gl.enableVertexAttribArray(
-        programInfo.attribLocations.vertexColor);
+      programInfo.attribLocations.vertexColor);
+  }
+  
+  {
+    const numComponents = 2;
+    const type = gl.FLOAT;
+    const normalize = false;
+    const stride = 0;
+    const offset = 0;
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.uv);
+    gl.vertexAttribPointer(
+      programInfo.attribLocations.vertexUV,
+      numComponents,
+      type,
+      normalize,
+      stride,
+      offset);
+    gl.enableVertexAttribArray(
+      programInfo.attribLocations.vertexUV);
   }
 
   gl.useProgram(programInfo.program);
@@ -134,6 +166,7 @@ async function main() {
     attribLocations: {
       vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
       vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor'),
+      vertexUV: gl.getAttribLocation(shaderProgram, 'aVertexUV'),
     },
     uniformLocations: {
       projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
@@ -145,9 +178,9 @@ async function main() {
   let t = 0.0;
 
   function render() {
-  
-    drawScene(gl, programInfo, buffers, t+=0.01)
-    
+
+    drawScene(gl, programInfo, buffers, t += 0.01)
+
     requestAnimationFrame(render)
   }
 
