@@ -173,7 +173,7 @@ async function main() {
     return;
   }
 
-  const texture = await textures.loadTexture(gl, './decal.png')
+  const texture = 0;//await textures.loadTexture(gl, './decal.png')
 
   const shaderProgram = await shader.loadProgram(gl, './basic.vs', './basic.fs');
   const programInfo = {

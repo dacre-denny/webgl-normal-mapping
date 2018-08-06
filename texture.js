@@ -18,7 +18,6 @@ export async function loadTexture(gl, url) {
     await new Promise((resolve, reject) => {
 
         const image = new Image();
-        image.crossOrigin = "anonymous";
 
         image.onerror = function(err) {
             reject(err);
