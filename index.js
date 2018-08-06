@@ -143,6 +143,8 @@ function drawScene(gl, programInfo, buffers, texture, time) {
     
     gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
   }
+  
+  gl.uniform1f(programInfo.uniformLocations.time, time);
 
 
   gl.uniformMatrix4fv(
@@ -185,6 +187,7 @@ async function main() {
       projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
       modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
       uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
+      time: gl.getUniformLocation(shaderProgram, 'time'),
     },
   };
 
