@@ -1,29 +1,41 @@
-import { mat4 } from 'gl-matrix'
+import {
+  mat4
+} from 'gl-matrix'
 import * as shader from './shader'
 
 function initBuffers(gl) {
 
-  const positionBuffer = gl.createBuffer();
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-
-  const positions = [
-    -1.0,  1.0,
-     1.0,  1.0,
-    -1.0, -1.0,
-     1.0, -1.0,
+  const positions = [-1.0, 1.0,
+    1.0, 1.0, -1.0, -1.0,
+    1.0, -1.0,
   ];
 
+  const positionBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
   gl.bufferData(gl.ARRAY_BUFFER,
-                new Float32Array(positions),
-                gl.STATIC_DRAW);
+    new Float32Array(positions),
+    gl.STATIC_DRAW);
+
+  const colors = [
+    0.0, 1.0, 0.0, 1.0,
+    1.0, 0.0, 0.0, 1.0,
+    1.0, 1.0, 0.0, 1.0,
+    0.0, 1.0, 1.0, 1.0,
+  ];
+
+  const colorBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER,
+    new Float32Array(colors),
+    gl.STATIC_DRAW);
 
   return {
     position: positionBuffer,
+    color: colorBuffer,
   };
 }
 
-function drawScene(gl, programInfo, buffers) {
+function drawScene(gl, programInfo, buffers, time) {
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
   gl.clearDepth(1.0);
   gl.enable(gl.DEPTH_TEST);
@@ -31,21 +43,25 @@ function drawScene(gl, programInfo, buffers) {
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-  const fieldOfView = 45 * Math.PI / 180;   // in radians
+  const fieldOfView = 45 * Math.PI / 180; // in radians
   const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
   const zNear = 0.1;
   const zFar = 100.0;
   const projectionMatrix = mat4.create();
   mat4.perspective(projectionMatrix,
-                   fieldOfView,
-                   aspect,
-                   zNear,
-                   zFar);
-
+    fieldOfView,
+    aspect,
+    zNear,
+    zFar);
+ 
   const modelViewMatrix = mat4.create();
   mat4.translate(modelViewMatrix,
-                 modelViewMatrix,
-                 [-0.0, 0.0, -6.0]);
+    modelViewMatrix, [-0.0, 0.0, -6.0]);
+
+  const modelRotation = mat4.create();
+  mat4.fromZRotation(modelRotation, time)
+
+  mat4.mul(modelViewMatrix, modelRotation, modelViewMatrix)
 
   {
     const numComponents = 2;
@@ -53,33 +69,47 @@ function drawScene(gl, programInfo, buffers) {
     const normalize = false;
     const stride = 0;
     const offset = 0;
-    
+
     gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
     gl.vertexAttribPointer(
-        programInfo.attribLocations.vertexPosition,
+      programInfo.attribLocations.vertexPosition,
+      numComponents,
+      type,
+      normalize,
+      stride,
+      offset);
+    gl.enableVertexAttribArray(
+      programInfo.attribLocations.vertexPosition);
+  }
+
+  {
+    const numComponents = 4;
+    const type = gl.FLOAT;
+    const normalize = false;
+    const stride = 0;
+    const offset = 0;
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color);
+    gl.vertexAttribPointer(
+        programInfo.attribLocations.vertexColor,
         numComponents,
         type,
         normalize,
         stride,
         offset);
     gl.enableVertexAttribArray(
-        programInfo.attribLocations.vertexPosition);
+        programInfo.attribLocations.vertexColor);
   }
-
-  // Tell WebGL to use our program when drawing
 
   gl.useProgram(programInfo.program);
 
-  // Set the shader uniforms
-
   gl.uniformMatrix4fv(
-      programInfo.uniformLocations.projectionMatrix,
-      false,
-      projectionMatrix);
+    programInfo.uniformLocations.projectionMatrix,
+    false,
+    projectionMatrix);
   gl.uniformMatrix4fv(
-      programInfo.uniformLocations.modelViewMatrix,
-      false,
-      modelViewMatrix);
+    programInfo.uniformLocations.modelViewMatrix,
+    false,
+    modelViewMatrix);
 
   {
     const offset = 0;
@@ -89,20 +119,21 @@ function drawScene(gl, programInfo, buffers) {
 }
 
 async function main() {
-  
+
   const canvas = document.querySelector("canvas");
   const gl = canvas.getContext("webgl2");
-  
+
   if (gl === null) {
     console.error("Unable to initialize WebGL. Your browser or machine may not support it.");
     return;
   }
-  
+
   const shaderProgram = await shader.loadProgram(gl, '/basic.vs', '/basic.fs');
   const programInfo = {
     program: shaderProgram,
     attribLocations: {
       vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
+      vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor'),
     },
     uniformLocations: {
       projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
@@ -111,8 +142,17 @@ async function main() {
   };
 
   const buffers = initBuffers(gl)
+  let t = 0.0;
 
-  drawScene(gl, programInfo, buffers)
+  function render() {
+  
+    drawScene(gl, programInfo, buffers, t+=0.01)
+    
+    requestAnimationFrame(render)
+  }
+
+  requestAnimationFrame(render)
 }
+
 
 main()
