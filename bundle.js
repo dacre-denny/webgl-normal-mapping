@@ -7701,6 +7701,7 @@ async function loadTexture(gl, url) {
     await new Promise(function (resolve, reject) {
 
         var image = new Image();
+        image.crossOrigin = "anonymous";
 
         image.onerror = function (err) {
             reject(err);
