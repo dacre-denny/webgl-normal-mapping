@@ -2,6 +2,7 @@ import {
   mat4
 } from 'gl-matrix'
 import * as shader from './shader'
+import * as textures from './texture'
 
 function initBuffers(gl) {
 
@@ -49,7 +50,7 @@ function initBuffers(gl) {
   };
 }
 
-function drawScene(gl, programInfo, buffers, time) {
+function drawScene(gl, programInfo, buffers, texture, time) {
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
   gl.clearDepth(1.0);
   gl.enable(gl.DEPTH_TEST);
@@ -113,7 +114,7 @@ function drawScene(gl, programInfo, buffers, time) {
     gl.enableVertexAttribArray(
       programInfo.attribLocations.vertexColor);
   }
-  
+
   {
     const numComponents = 2;
     const type = gl.FLOAT;
@@ -133,6 +134,16 @@ function drawScene(gl, programInfo, buffers, time) {
   }
 
   gl.useProgram(programInfo.program);
+  
+
+  {
+    gl.activeTexture(gl.TEXTURE0);
+
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    
+    gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
+  }
+
 
   gl.uniformMatrix4fv(
     programInfo.uniformLocations.projectionMatrix,
@@ -160,6 +171,8 @@ async function main() {
     return;
   }
 
+  const texture = await textures.loadTexture(gl, '/decal.png')
+
   const shaderProgram = await shader.loadProgram(gl, '/basic.vs', '/basic.fs');
   const programInfo = {
     program: shaderProgram,
@@ -171,6 +184,7 @@ async function main() {
     uniformLocations: {
       projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
       modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
+      uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
     },
   };
 
@@ -179,7 +193,7 @@ async function main() {
 
   function render() {
 
-    drawScene(gl, programInfo, buffers, t += 0.01)
+    drawScene(gl, programInfo, buffers, texture, t += 0.01)
 
     requestAnimationFrame(render)
   }
