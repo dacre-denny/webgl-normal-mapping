@@ -143,6 +143,14 @@ function drawScene(gl, programInfo, buffers, texture, time) {
     
     gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
   }
+
+  {
+    gl.activeTexture(gl.TEXTURE1);
+
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    
+    gl.uniform1i(programInfo.uniformLocations.uSamplerB, 0);
+  }
   
   gl.uniform1f(programInfo.uniformLocations.time, time);
 
@@ -187,6 +195,7 @@ async function main() {
       projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
       modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
       uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
+      uSamplerB: gl.getUniformLocation(shaderProgram, 'uSamplerB'),
       time: gl.getUniformLocation(shaderProgram, 'time'),
     },
   };
