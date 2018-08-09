@@ -1,8 +1,46 @@
 import {
-  mat4
+  mat4, vec3
 } from 'gl-matrix'
 import * as shader from './shader'
 import * as textures from './texture'
+
+const camera = {
+  position : [0,0,10],
+  lookat : [0,0,0],
+}
+
+document.addEventListener('keydown', (event) => {
+  switch(event.keyCode) {
+    case 87: {
+
+      const v = [0,0,0]
+      
+      vec3.subtract(v, camera.lookat, camera.position)
+      vec3.scale(v, v, 0.1)
+      vec3.add(camera.position, camera.position, v)
+      
+      break
+    }
+    case 83: {
+      
+      const v = [0,0,0]
+      
+      vec3.subtract(v, camera.lookat, camera.position)
+      vec3.scale(v, v, -0.1)
+      vec3.add(camera.position, camera.position, v)
+      
+      break
+    }
+  }
+})
+
+
+document.addEventListener('mousemove', (event) => {
+  
+  const t = 5 * wwwwwwwwwwwwwwwwwwwwwwevent.movementX / document.body.clientWidth;
+  
+  vec3.rotateY(camera.position, camera.position, camera.lookat, t)  
+})
 
 function initBuffers(gl) {
 
@@ -70,13 +108,14 @@ function drawScene(gl, programInfo, buffers, texture, time) {
     zFar);
 
   const modelViewMatrix = mat4.create();
-  mat4.translate(modelViewMatrix,
-    modelViewMatrix, [-0.0, 0.0, -6.0]);
+  mat4.lookAt(modelViewMatrix, camera.position, camera.lookat, [0,1,0])
+  // mat4.translate(modelViewMatrix,
+  //   modelViewMatrix, [-0.0, 0.0, -6.0]);
 
   const modelRotation = mat4.create();
   mat4.fromZRotation(modelRotation, time)
 
-  mat4.mul(modelViewMatrix, modelRotation, modelViewMatrix)
+  //mat4.mul(modelViewMatrix, modelRotation, modelViewMatrix)
 
   {
     const numComponents = 3;
