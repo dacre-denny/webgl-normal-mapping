@@ -5,7 +5,7 @@ import * as shader from './shader'
 import * as textures from './texture'
 
 const camera = {
-  position : [0,0,10],
+  position : [0,0,3],
   lookat : [0,0,0],
 }
 
@@ -37,7 +37,7 @@ document.addEventListener('keydown', (event) => {
 
 document.addEventListener('mousemove', (event) => {
   
-  const t = 5 * wwwwwwwwwwwwwwwwwwwwwwevent.movementX / document.body.clientWidth;
+  const t = 5 * event.movementX / document.body.clientWidth;
   
   vec3.rotateY(camera.position, camera.position, camera.lookat, t)  
 })
@@ -45,8 +45,9 @@ document.addEventListener('mousemove', (event) => {
 function initBuffers(gl) {
 
   const positions = [-1.0, 1.0, 0.0,
-    1.0, 1.0, 0.5, -1.0, -1.0, 0.0,
-    1.0, -1.0, -0.1
+    1.0, 1.0, 0.0, 
+    -1.0, -1.0, 0.0,
+    1.0, -1.0, 0.0
   ];
 
   const uvs = [
