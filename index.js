@@ -13,7 +13,7 @@ document.addEventListener('keydown', (event) => {
   switch(event.keyCode) {
     case 87: {
 
-      const v = [0,0,0]
+      const v = [0,0,0] 
       
       vec3.subtract(v, camera.lookat, camera.position)
       vec3.scale(v, v, 0.1)
@@ -33,7 +33,6 @@ document.addEventListener('keydown', (event) => {
     }
   }
 })
-
 
 document.addEventListener('mousemove', (event) => {
   
@@ -64,6 +63,20 @@ function initBuffers(gl) {
     0.0, 1.0, 1.0, 1.0,
   ];
 
+  const tangents = [
+    0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0,
+  ];
+  
+  const normals = [
+    0.0, 0.0, 1.0,
+    0.0, 0.0, 1.0,
+    0.0, 0.0, 1.0,
+    0.0, 0.0, 1.0,
+  ];
+
   const positionBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
   gl.bufferData(gl.ARRAY_BUFFER,
@@ -82,10 +95,24 @@ function initBuffers(gl) {
     new Float32Array(uvs),
     gl.STATIC_DRAW);
 
+  const normalBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER,
+    new Float32Array(normals),
+    gl.STATIC_DRAW);
+
+  const tangentBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, tangentBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER,
+    new Float32Array(tangents),
+    gl.STATIC_DRAW);
+
   return {
     position: positionBuffer,
     color: colorBuffer,
     uv: uvBuffer,
+    normal: normalBuffer,
+    tangent: tangentBuffer,
   };
 }
 
@@ -110,13 +137,9 @@ function drawScene(gl, programInfo, buffers, texture, time) {
 
   const modelViewMatrix = mat4.create();
   mat4.lookAt(modelViewMatrix, camera.position, camera.lookat, [0,1,0])
-  // mat4.translate(modelViewMatrix,
-  //   modelViewMatrix, [-0.0, 0.0, -6.0]);
 
   const modelRotation = mat4.create();
   mat4.fromZRotation(modelRotation, time)
-
-  //mat4.mul(modelViewMatrix, modelRotation, modelViewMatrix)
 
   {
     const numComponents = 3;
@@ -171,6 +194,42 @@ function drawScene(gl, programInfo, buffers, texture, time) {
       offset);
     gl.enableVertexAttribArray(
       programInfo.attribLocations.vertexUV);
+  }
+ 
+  {
+    const numComponents = 3;
+    const type = gl.FLOAT;
+    const normalize = false;
+    const stride = 0;
+    const offset = 0;
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.normal);
+    gl.vertexAttribPointer(
+      programInfo.attribLocations.vertexNormal,
+      numComponents,
+      type,
+      normalize,
+      stride,
+      offset);
+    gl.enableVertexAttribArray(
+      programInfo.attribLocations.vertexNormal);
+  }
+
+  {
+    const numComponents = 3;
+    const type = gl.FLOAT;
+    const normalize = false;
+    const stride = 0;
+    const offset = 0;
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.tangent);
+    gl.vertexAttribPointer(
+      programInfo.attribLocations.vertexTangent,
+      numComponents,
+      type,
+      normalize,
+      stride,
+      offset);
+    gl.enableVertexAttribArray(
+      programInfo.attribLocations.vertexTangent);
   }
 
   gl.useProgram(programInfo.program);
@@ -227,9 +286,11 @@ async function main() {
   const programInfo = {
     program: shaderProgram,
     attribLocations: {
-      vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
-      vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor'),
-      vertexUV: gl.getAttribLocation(shaderProgram, 'aVertexUV'),
+      vertexPosition: gl.getAttribLocation(shaderProgram, 'position'),
+      vertexColor: gl.getAttribLocation(shaderProgram, 'color'),
+      vertexUV: gl.getAttribLocation(shaderProgram, 'texcoord'),
+      vertexNormal: gl.getAttribLocation(shaderProgram, 'normal'),
+      vertexTangent: gl.getAttribLocation(shaderProgram, 'tangent'),
     },
     uniformLocations: {
       projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
@@ -239,7 +300,7 @@ async function main() {
       time: gl.getUniformLocation(shaderProgram, 'time'),
     },
   };
-
+ 
   const buffers = initBuffers(gl)
   let t = 0.0;
 

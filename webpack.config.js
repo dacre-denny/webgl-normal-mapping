@@ -7,7 +7,7 @@ module.exports = {
   module: {
     loaders: [
       {
-        test: /.js?$/,
+        test: /.(js|vs|fs)?$/,
         loader: 'babel-loader',
         exclude: /node_modules/,
         query: {
