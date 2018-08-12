@@ -9,6 +9,10 @@ const camera = {
   lookat : [0,0,0],
 }
 
+const light = {
+  position : [1.5,0.5,0.0]
+}
+
 document.addEventListener('keydown', (event) => {
   switch(event.keyCode) {
     case 87: {
@@ -38,7 +42,9 @@ document.addEventListener('mousemove', (event) => {
   
   const t = 5 * event.movementX / document.body.clientWidth;
   
-  vec3.rotateY(camera.position, camera.position, camera.lookat, t)  
+  //vec3.rotateY(camera.position, camera.position, camera.lookat, t)  
+  
+  vec3.rotateY(light.position, light.position, [0,0,0], t)  
 })
 
 function initBuffers(gl) {
@@ -262,6 +268,9 @@ function drawScene(gl, programInfo, buffers, texture, time) {
     programInfo.uniformLocations.modelViewMatrix,
     false,
     modelViewMatrix);
+  gl.uniform3fv(
+    programInfo.uniformLocations.lightPosition,
+    light.position);
 
   {
     const offset = 0;
@@ -298,6 +307,7 @@ async function main() {
       uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
       uSamplerB: gl.getUniformLocation(shaderProgram, 'uSamplerB'),
       time: gl.getUniformLocation(shaderProgram, 'time'),
+      lightPosition: gl.getUniformLocation(shaderProgram, 'uLightPosition'),
     },
   };
  
