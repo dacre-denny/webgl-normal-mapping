@@ -3,7 +3,9 @@ var CopyWebpackPlugin = require('copy-webpack-plugin')
 var webpack = require('webpack');
  
 module.exports = {
-  entry: './index.js',
+  entry: {
+    app : './index.js'
+  },
   devtool: 'inline-source-map',
   output: { 
     path: path.resolve(__dirname, 'dist'), 
@@ -23,24 +25,4 @@ module.exports = {
       debug : 'info'
     }),
   ]
-  /*
-  module: {
-    rules: [
-      {
-        test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/
-      }
-    ],
-    loaders: [
-      {
-        test: /.js?$/,
-        loader: 'babel-loader',
-        exclude: /node_modules/,
-        query: {
-          presets: ['es2015']
-        }
-      }
-    ]
-  },*/
 };
