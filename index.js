@@ -1,7 +1,7 @@
 import {
   mat4, vec3
 } from 'gl-matrix'
-import * as shader from './shader'
+import * as shader from './shader.ts'
 import * as textures from './texture'
 
 const camera = {
@@ -156,14 +156,14 @@ function drawScene(gl, programInfo, buffers, texture, time) {
 
     gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
     gl.vertexAttribPointer(
-      programInfo.attribLocations.vertexPosition,
+      programInfo.attributes.position,
       numComponents,
       type,
       normalize,
       stride,
       offset);
     gl.enableVertexAttribArray(
-      programInfo.attribLocations.vertexPosition);
+      programInfo.attributes.position);
   }
 
   {
@@ -174,14 +174,14 @@ function drawScene(gl, programInfo, buffers, texture, time) {
     const offset = 0;
     gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color);
     gl.vertexAttribPointer(
-      programInfo.attribLocations.vertexColor,
+      programInfo.attributes.color,
       numComponents,
       type,
       normalize,
       stride,
       offset);
     gl.enableVertexAttribArray(
-      programInfo.attribLocations.vertexColor);
+      programInfo.attributes.color);
   }
 
   {
@@ -192,14 +192,14 @@ function drawScene(gl, programInfo, buffers, texture, time) {
     const offset = 0;
     gl.bindBuffer(gl.ARRAY_BUFFER, buffers.uv);
     gl.vertexAttribPointer(
-      programInfo.attribLocations.vertexUV,
+      programInfo.attributes.texcoord,
       numComponents,
       type,
       normalize,
       stride,
       offset);
     gl.enableVertexAttribArray(
-      programInfo.attribLocations.vertexUV);
+      programInfo.attributes.texcoord);
   }
  
   {
@@ -210,14 +210,14 @@ function drawScene(gl, programInfo, buffers, texture, time) {
     const offset = 0;
     gl.bindBuffer(gl.ARRAY_BUFFER, buffers.normal);
     gl.vertexAttribPointer(
-      programInfo.attribLocations.vertexNormal,
+      programInfo.attributes.normal,
       numComponents,
       type,
       normalize,
       stride,
       offset);
     gl.enableVertexAttribArray(
-      programInfo.attribLocations.vertexNormal);
+      programInfo.attributes.normal);
   }
 
   {
@@ -228,14 +228,14 @@ function drawScene(gl, programInfo, buffers, texture, time) {
     const offset = 0;
     gl.bindBuffer(gl.ARRAY_BUFFER, buffers.tangent);
     gl.vertexAttribPointer(
-      programInfo.attribLocations.vertexTangent,
+      programInfo.attributes.tangent,
       numComponents,
       type,
       normalize,
       stride,
       offset);
     gl.enableVertexAttribArray(
-      programInfo.attribLocations.vertexTangent);
+      programInfo.attributes.tangent);
   }
 
   gl.useProgram(programInfo.program);
@@ -246,7 +246,7 @@ function drawScene(gl, programInfo, buffers, texture, time) {
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
     
-    gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
+    gl.uniform1i(programInfo.uniforms.uSampler, 0);
   }
 
   {
@@ -254,22 +254,21 @@ function drawScene(gl, programInfo, buffers, texture, time) {
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
     
-    gl.uniform1i(programInfo.uniformLocations.uSamplerB, 0);
+    gl.uniform1i(programInfo.uniforms.uSamplerB, 0);
   }
   
-  gl.uniform1f(programInfo.uniformLocations.time, time);
-
-
+  gl.uniform1f(programInfo.uniforms.time, time);
+ 
   gl.uniformMatrix4fv(
-    programInfo.uniformLocations.projectionMatrix,
+    programInfo.uniforms.uProjectionMatrix,
     false,
     projectionMatrix);
   gl.uniformMatrix4fv(
-    programInfo.uniformLocations.modelViewMatrix,
+    programInfo.uniforms.uModelViewMatrix,
     false,
     modelViewMatrix);
   gl.uniform3fv(
-    programInfo.uniformLocations.lightPosition,
+    programInfo.uniforms.uLightPosition,
     light.position);
 
   {
@@ -291,32 +290,45 @@ async function main() {
 
   const texture = await textures.loadTexture(gl, './textures/decal.png')
 
-  const shaderProgram = await shader.loadProgram(gl, './shaders/basic.vs', './shaders/basic.fs');
-  const programInfo = {
-    program: shaderProgram,
-    attribLocations: {
-      vertexPosition: gl.getAttribLocation(shaderProgram, 'position'),
-      vertexColor: gl.getAttribLocation(shaderProgram, 'color'),
-      vertexUV: gl.getAttribLocation(shaderProgram, 'texcoord'),
-      vertexNormal: gl.getAttribLocation(shaderProgram, 'normal'),
-      vertexTangent: gl.getAttribLocation(shaderProgram, 'tangent'),
-    },
-    uniformLocations: {
-      projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
-      modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
-      uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
-      uSamplerB: gl.getUniformLocation(shaderProgram, 'uSamplerB'),
-      time: gl.getUniformLocation(shaderProgram, 'time'),
-      lightPosition: gl.getUniformLocation(shaderProgram, 'uLightPosition'),
-    },
-  };
+  const shaderProgram = await shader.loadProgram(gl, './shaders/basic.vs', './shaders/basic.fs', [
+    'position',
+    'color',
+    'texcoord',
+    'normal',
+    'tangent'
+  ], [
+    'uProjectionMatrix',
+    'uModelViewMatrix',
+    'uSampler',
+    'uSamplerB',
+    'time',
+    'uLightPosition'
+  ]);
+  // const programInfo = {
+  //   program: shaderProgram,
+  //   attributes: {
+  //     position: gl.getAttribLocation(shaderProgram, 'position'),
+  //     color: gl.getAttribLocation(shaderProgram, 'color'),
+  //     uv: gl.getAttribLocation(shaderProgram, 'texcoord'),
+  //     normal: gl.getAttribLocation(shaderProgram, 'normal'),
+  //     tangent: gl.getAttribLocation(shaderProgram, 'tangent'),
+  //   },
+  //   uniforms: {
+  //     projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
+  //     modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
+  //     uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
+  //     uSamplerB: gl.getUniformLocation(shaderProgram, 'uSamplerB'),
+  //     time: gl.getUniformLocation(shaderProgram, 'time'),
+  //     lightPosition: gl.getUniformLocation(shaderProgram, 'uLightPosition'),
+  //   },
+  // };
  
   const buffers = initBuffers(gl)
   let t = 0.0;
 
   function render() {
 
-    drawScene(gl, programInfo, buffers, texture, t += 0.01)
+    drawScene(gl, shaderProgram, buffers, texture, t += 0.01)
 
     requestAnimationFrame(render)
   }

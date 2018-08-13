@@ -17,11 +17,14 @@
   "homepage": "https://github.com/mooce/webgl-normal-mapping#readme",
   "devDependencies": {
     "copy-webpack-plugin": "^4.5.2",
+    "ts-loader": "^4.4.2",
+    "typescript": "^3.0.1",
     "webpack": "^4.16.5",
     "webpack-cli": "^2.1.5",
     "webpack-dev-server": "^3.1.4"
   },
   "dependencies": {
+    "@types/webgl2": "0.0.4",
     "gl-matrix": "^2.7.1"
   }
 }
