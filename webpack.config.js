@@ -22,7 +22,7 @@ module.exports = {
       { from: './shaders/**.*', to : './shaders/[name].[ext]' },
       { from: './textures/**.*', to : './textures/[name].[ext]' },
     ], {
-      debug : 'info'
+      debug : 'error'
     }),
   ]
 };

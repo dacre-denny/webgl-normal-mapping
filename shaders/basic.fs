@@ -23,7 +23,7 @@ void main() {
   vec3 lsTangent = vec3(uModelViewMatrix * vec4(tangent.xyz, 0.0));
   vec3 lsDirection = vec3(uModelViewMatrix * vec4(lightDirection.xyz, 0.0));
 
-  float diffuse = max(0.2, dot(lightDirection, normal));
+  float diffuse = max(0.11, dot(lightDirection, normal));
 
   gl_FragColor = vec4(diffuse,diffuse,diffuse,1.0);
 }
