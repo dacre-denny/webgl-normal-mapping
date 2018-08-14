@@ -1,139 +1,180 @@
-import {vec3} from 'gl-matrix'
-import {Shader} from './shader'
+import { vec3 } from "gl-matrix";
+import { Shader } from "./shader";
 
-class Geometry {
-
-    buffer: number[];
+interface Geometry {
+  buffer: WebGLBuffer;
+  typedArray: Float32Array;
 }
 
 class Vertex {
-    geometry: number;
-    offset : number;
+  geometry: number;
+  offset: number;
 
-    get position() : vec3 {
-
-        return []
-    };
-    normal : vec3;
-    tangent : vec3;
-    color : vec3;
-    uv : vec3;
+  set position(v: vec3) {}
+  normal: vec3;
+  tangent: vec3;
+  color: vec3;
+  uv: vec3;
 }
 
-function render(gl:WebGL2RenderingContext, shader:Shader) {
-    
-  {
-    const numComponents = 3;
-    const type = gl.FLOAT;
-    const normalize = false;
-    const stride = 0;
-    const offset = 0;
+class SimpleVertex {
+  private buffer: Float32Array;
+  private static size: number = 6;
+  position: vec3;
+  color: vec3;
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
-    gl.vertexAttribPointer(
-      shader.attributes.position,
-      numComponents,
-      type,
-      normalize,
-      stride,
-      offset);
-    gl.enableVertexAttribArray(
-      shader.attributes.position);
-  }
+  static createBuffer(gl: WebGL2RenderingContext, vertices: SimpleVertex[]) {
+    const typedArray = new Float32Array(SimpleVertex.size * vertices.length);
 
-  {
-    const numComponents = 4;
-    const type = gl.FLOAT;
-    const normalize = false;
-    const stride = 0;
-    const offset = 0;
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color);
-    gl.vertexAttribPointer(
-      shader.attributes.color,
-      numComponents,
-      type,
-      normalize,
-      stride,
-      offset);
-    gl.enableVertexAttribArray(
-      shader.attributes.color);
-  }
+    for (const vertex of vertices) {
+      vertex.buffer = typedArray;
+    }
 
-  {
-    const numComponents = 2;
-    const type = gl.FLOAT;
-    const normalize = false;
-    const stride = 0;
-    const offset = 0;
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.uv);
-    gl.vertexAttribPointer(
-      shader.attributes.texcoord,
-      numComponents,
-      type,
-      normalize,
-      stride,
-      offset);
-    gl.enableVertexAttribArray(
-      shader.attributes.texcoord);
-  }
- 
-  {
-    const numComponents = 3;
-    const type = gl.FLOAT;
-    const normalize = false;
-    const stride = 0;
-    const offset = 0;
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.normal);
-    gl.vertexAttribPointer(
-      shader.attributes.normal,
-      numComponents,
-      type,
-      normalize,
-      stride,
-      offset);
-    gl.enableVertexAttribArray(
-      shader.attributes.normal);
-  }
-
-  {
-    const numComponents = 3;
-    const type = gl.FLOAT;
-    const normalize = false;
-    const stride = 0;
-    const offset = 0;
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.tangent);
-    gl.vertexAttribPointer(
-      shader.attributes.tangent,
-      numComponents,
-      type,
-      normalize,
-      stride,
-      offset);
-    gl.enableVertexAttribArray(
-      shader.attributes.tangent);
-  }
-}
-
-function initBuffers(gl:WebGL2RenderingContext) {
-
-    const typedArray = new Float32Array([
-        -1.0, +1.0, 0.0, /**/ 0.0, 1.0, /**/ 0.0, 1.0, 0.0, 1.0, /**/ 0.0, 1.0, 0.0, /**/ 0.0, 0.0, 1.0,
-        +1.0, +1.0, 0.0, /**/ 0.0, 1.0, /**/ 0.0, 1.0, 0.0, 1.0, /**/ 0.0, 1.0, 0.0, /**/ 0.0, 0.0, 1.0,
-        -1.0, -1.0, 0.0, /**/ 0.0, 1.0, /**/ 0.0, 1.0, 0.0, 1.0, /**/ 0.0, 1.0, 0.0, /**/ 0.0, 0.0, 1.0,
-        +1.0, -1.0, 0.0, /**/ 0.0, 1.0, /**/ 0.0, 1.0, 0.0, 1.0, /**/ 0.0, 1.0, 0.0, /**/ 0.0, 0.0, 1.0,
-      ]);
     const buffer = gl.createBuffer();
 
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER,
-      typedArray,
-      gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, typedArray, gl.STATIC_DRAW);
+  }
+}
 
-    return {
-        typedArray,
-        buffer
-    }
-/*
+function render(
+  gl: WebGL2RenderingContext,
+  geometry: Geometry,
+  shader: Shader
+) {
+  const stride = 15;
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, geometry.buffer);
+
+  // position
+  gl.vertexAttribPointer(
+    shader.attributes.position,
+    3,
+    gl.FLOAT,
+    false,
+    Float32Array.BYTES_PER_ELEMENT * stride,
+    Float32Array.BYTES_PER_ELEMENT * 0
+  );
+  gl.enableVertexAttribArray(shader.attributes.position);
+
+  // texcoord
+  gl.vertexAttribPointer(
+    shader.attributes.texcoord,
+    2,
+    gl.FLOAT,
+    false,
+    Float32Array.BYTES_PER_ELEMENT * stride,
+    Float32Array.BYTES_PER_ELEMENT * 3
+  );
+  gl.enableVertexAttribArray(shader.attributes.texcoord);
+
+  // color
+  gl.vertexAttribPointer(
+    shader.attributes.color,
+    4,
+    gl.FLOAT,
+    false,
+    Float32Array.BYTES_PER_ELEMENT * stride,
+    Float32Array.BYTES_PER_ELEMENT * 5
+  );
+  gl.enableVertexAttribArray(shader.attributes.color);
+
+  // normal
+  gl.vertexAttribPointer(
+    shader.attributes.normal,
+    3,
+    gl.FLOAT,
+    false,
+    Float32Array.BYTES_PER_ELEMENT * stride,
+    Float32Array.BYTES_PER_ELEMENT * 8
+  );
+  gl.enableVertexAttribArray(shader.attributes.normal);
+
+  //tangent
+  gl.vertexAttribPointer(
+    shader.attributes.tangent,
+    3,
+    gl.FLOAT,
+    false,
+    Float32Array.BYTES_PER_ELEMENT * stride,
+    Float32Array.BYTES_PER_ELEMENT * 11
+  );
+  gl.enableVertexAttribArray(shader.attributes.tangent);
+}
+
+function initBuffers(gl: WebGL2RenderingContext): Geometry {
+  const typedArray = new Float32Array([
+    -1.0,
+    +1.0,
+    0.0,
+    /**/ 0.0,
+    1.0,
+    /**/ 0.0,
+    1.0,
+    0.0,
+    1.0,
+    /**/ 0.0,
+    1.0,
+    0.0,
+    /**/ 0.0,
+    0.0,
+    1.0,
+    +1.0,
+    +1.0,
+    0.0,
+    /**/ 0.0,
+    1.0,
+    /**/ 0.0,
+    1.0,
+    0.0,
+    1.0,
+    /**/ 0.0,
+    1.0,
+    0.0,
+    /**/ 0.0,
+    0.0,
+    1.0,
+    -1.0,
+    -1.0,
+    0.0,
+    /**/ 0.0,
+    1.0,
+    /**/ 0.0,
+    1.0,
+    0.0,
+    1.0,
+    /**/ 0.0,
+    1.0,
+    0.0,
+    /**/ 0.0,
+    0.0,
+    1.0,
+    +1.0,
+    -1.0,
+    0.0,
+    /**/ 0.0,
+    1.0,
+    /**/ 0.0,
+    1.0,
+    0.0,
+    1.0,
+    /**/ 0.0,
+    1.0,
+    0.0,
+    /**/ 0.0,
+    0.0,
+    1.0
+  ]);
+  const buffer = gl.createBuffer();
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, typedArray, gl.STATIC_DRAW);
+
+  return {
+    typedArray,
+    buffer
+  };
+  /*
 
     const positions = [-1.0, 1.0, 0.0,
       1.0, 1.0, 0.0, 
@@ -207,5 +248,4 @@ function initBuffers(gl:WebGL2RenderingContext) {
       tangent: tangentBuffer,
     };
     */
-  }
-  
+}
