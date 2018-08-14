@@ -4,7 +4,7 @@ var webpack = require('webpack');
  
 module.exports = {
   entry: {
-    app : './index.js'
+    app : './index.ts'
   },
   devtool: 'inline-source-map',
   output: { 

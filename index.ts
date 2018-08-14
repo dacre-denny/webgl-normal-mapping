@@ -1,7 +1,7 @@
 import {
   mat4, vec3
 } from 'gl-matrix'
-import * as shader from './shader.ts'
+import * as shader from './shader'
 import * as textures from './texture'
 
 const camera = {
@@ -38,13 +38,18 @@ document.addEventListener('keydown', (event) => {
   }
 })
 
-document.addEventListener('mousemove', (event) => {
-  
+document.addEventListener('mousemove', (event:MouseEvent) => {
+
   const t = 5 * event.movementX / document.body.clientWidth;
-  
-  //vec3.rotateY(camera.position, camera.position, camera.lookat, t)  
-  
-  vec3.rotateY(light.position, light.position, [0,0,0], t)  
+
+  if(event.buttons > 0) {
+
+    vec3.rotateY(camera.position, camera.position, camera.lookat, t)  
+  }
+  else {
+
+    vec3.rotateY(light.position, light.position, [0,0,0], t)  
+  }
 })
 
 function initBuffers(gl) {
@@ -281,7 +286,7 @@ function drawScene(gl, programInfo, buffers, texture, time) {
 async function main() {
 
   const canvas = document.querySelector("canvas");
-  const gl = canvas.getContext("webgl2");
+  const gl = canvas.getContext("webgl2") as WebGL2RenderingContext;
 
   if (gl === null) {
     console.error("Unable to initialize WebGL. Your browser or machine may not support it.");
@@ -304,24 +309,6 @@ async function main() {
     'time',
     'uLightPosition'
   ]);
-  // const programInfo = {
-  //   program: shaderProgram,
-  //   attributes: {
-  //     position: gl.getAttribLocation(shaderProgram, 'position'),
-  //     color: gl.getAttribLocation(shaderProgram, 'color'),
-  //     uv: gl.getAttribLocation(shaderProgram, 'texcoord'),
-  //     normal: gl.getAttribLocation(shaderProgram, 'normal'),
-  //     tangent: gl.getAttribLocation(shaderProgram, 'tangent'),
-  //   },
-  //   uniforms: {
-  //     projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
-  //     modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
-  //     uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
-  //     uSamplerB: gl.getUniformLocation(shaderProgram, 'uSamplerB'),
-  //     time: gl.getUniformLocation(shaderProgram, 'time'),
-  //     lightPosition: gl.getUniformLocation(shaderProgram, 'uLightPosition'),
-  //   },
-  // };
  
   const buffers = initBuffers(gl)
   let t = 0.0;

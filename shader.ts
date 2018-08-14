@@ -1,4 +1,4 @@
-interface Shader {
+export interface Shader {
     program : WebGLProgram;
     attributes : any;
     uniforms: any;
