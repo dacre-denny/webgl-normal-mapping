@@ -7,8 +7,8 @@ interface Geometry {
 }
 
 class Vertex {
-  geometry: number;
-  offset: number;
+  //  geometry: number;
+  //  offset: number;
 
   set position(v: vec3) {}
   normal: vec3;
