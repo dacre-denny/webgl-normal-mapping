@@ -20,17 +20,15 @@ void main() {
 
   vec3 normal = normalize(vNormal);
   vec3 tangent = normalize(vTangent);
-  vec3 cotangent = cross(normal, tangent);
-    
-    //gl_Position = uProjectionMatrix * uModelViewMatrix * position;
+  vec3 cotangent = normalize(cross(normal, tangent));
 
-  normal.xz -= (texture2D(uSamplerB, vTextureCoord).xz * 2.0 - vec2(1.0, 1.0)) * 0.5;
+  mat3 tangentSpace = mat3(normal, tangent, cotangent);
 
-  vec3 lsNormal = vec3(uModelViewMatrix * vec4(normal.xyz, 0.0));
-  vec3 lsTangent = vec3(uModelViewMatrix * vec4(tangent.xyz, 0.0));
-  vec3 lsDirection = vec3(uModelViewMatrix * vec4(lightDirection.xyz, 0.0));
+  vec3 texelNormal = (texture2D(uSamplerB, vTextureCoord).xyz - vec3(0.5, 0.5, 0.5)) * 2.0;
 
-  float diffuse = max(0.11, dot(lightDirection, normal));
+  vec3 tangentNormal = tangentSpace * texelNormal;
+
+  float diffuse = max(0.11, dot(lightDirection, tangentNormal));
 
   gl_FragColor = texture2D(uSampler, vTextureCoord) * vec4(diffuse,diffuse,diffuse,1.0);
   //gl_FragColor = texture2D(uSamplerB, vTextureCoord); // vec4(diffuse,diffuse,diffuse,1.0);
