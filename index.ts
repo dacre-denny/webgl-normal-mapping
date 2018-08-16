@@ -1,6 +1,7 @@
 import { mat4, vec3 } from "gl-matrix";
 import * as shader from "./shader";
 import * as textures from "./texture";
+import * as geometry from "./geometry";
 
 const camera = {
   position: [0, 0, 3],
@@ -45,6 +46,7 @@ document.addEventListener("mousemove", (event: MouseEvent) => {
 });
 
 function initBuffers(gl) {
+  
   const positions = [
     -1.0,
     1.0,
@@ -296,6 +298,8 @@ async function main() {
       "uLightPosition"
     ]
   );
+
+  geometry.
 
   const buffers = initBuffers(gl);
   let t = 0.0;

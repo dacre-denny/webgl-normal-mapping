@@ -26,6 +26,7 @@
   "dependencies": {
     "@types/gl-matrix": "^2.4.1",
     "@types/webgl2": "0.0.4",
-    "gl-matrix": "^2.7.1"
+    "gl-matrix": "^2.7.1",
+    "twgl.js": "^4.4.0"
   }
 }

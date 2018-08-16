@@ -31,6 +31,4 @@ void main() {
   float diffuse = max(0.11, dot(lightDirection, tangentNormal));
 
   gl_FragColor = texture2D(uSampler, vTextureCoord) * vec4(diffuse,diffuse,diffuse,1.0);
-  //gl_FragColor = texture2D(uSamplerB, vTextureCoord); // vec4(diffuse,diffuse,diffuse,1.0);
-  // gl_FragColor = texture2D(uSampler, vTextureCoord); // vec4(diffuse,diffuse,diffuse,1.0);
 }
