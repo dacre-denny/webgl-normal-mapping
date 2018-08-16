@@ -7,36 +7,6 @@ interface Geometry {
   typedArray: Float32Array;
 }
 
-class Vertex {
-  //  geometry: number;
-  //  offset: number;
-
-  set position(v: vec3) {}
-  normal: vec3;
-  tangent: vec3;
-  color: vec3;
-  uv: vec3;
-}
-
-class SimpleVertex {
-  private buffer: Float32Array;
-  private static size: number = 6;
-  position: vec3;
-  color: vec3;
-
-  static createBuffer(gl: WebGL2RenderingContext, vertices: SimpleVertex[]) {
-    const typedArray = new Float32Array(SimpleVertex.size * vertices.length);
-
-    for (const vertex of vertices) {
-      vertex.buffer = typedArray;
-    }
-
-    const buffer = gl.createBuffer();
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, typedArray, gl.STATIC_DRAW);
-  }
-}
 
 function render(
   gl: WebGL2RenderingContext,
@@ -104,15 +74,9 @@ function render(
 }
 
 interface Buffer {
-  attributes: Map<string, WebGLBuffer>;
-  indicies?: WebGLBuffer;
-
-  // position: WebGLBuffer;
-  // normal: WebGLBuffer;
-  // tangent: WebGLBuffer;
-  // color: WebGLBuffer;
-  // texcoord: WebGLBuffer;
-  // indices: WebGLBuffer;
+  attributes: { [key: string]: { offset: number; components: number } };
+  buffer: WebGLBuffer;
+  indices?: WebGLBuffer;
 }
 
 export function createCube(gl: WebGL2RenderingContext): Buffer {
@@ -160,14 +124,63 @@ export function createCube(gl: WebGL2RenderingContext): Buffer {
     gl.STATIC_DRAW
   );
 
-  return {
-    position,
-    normal,
-    tangent,
-    color,
-    texcoord,
-    indices
-  };
+  return { attributes: {}, buffer: position, indices };
+}
+
+export function createBuff(
+  gl: WebGL2RenderingContext,
+  attributes: Map<string, { components: number; data: number[] }>,
+  indicies: number[]
+): Buffer {
+  const attrValues = Array.from(attributes.values());
+
+  const bufferSize = attrValues.reduce(
+    (size, attribute) => size + attribute.data.length,
+    0
+  );
+  const stride = attrValues.reduce(
+    (stride, attribute) => stride + attribute.components,
+    0
+  );
+
+  const array = new Array(bufferSize);
+  const bufferAttributes = new Map<
+    string,
+    { offset: number; components: number }
+  >();
+  let offset = 0;
+
+  for (const name of attributes.keys()) {
+    const attr = attributes.get(name);
+
+    bufferAttributes.set(name, { offset: offset, components: attr.components });
+
+    offset += attr.components;
+
+    let writeIndex = 0;
+    for (let i = 0; i < attr.data.length; i++) {
+      array[writeIndex] = attr.data[i];
+
+      const strideFactor = i === 0 || i % attr.components > 1 ? 0 : 1;
+
+      if (i === 0 || i % attr.components > 0) {
+        writeIndex++;
+      } else {
+        writeIndex;
+      }
+      writeIndex += stride * strideFactor;
+    }
+  }
+
+  const buffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Float32Array(Cube.positions),
+    gl.STATIC_DRAW
+  );
+
+  return { buffer, attributes: {} };
 }
 
 function bindBufferAndProgram(gl: WebGLRenderingContext, buffer: Buffer) {}
@@ -177,134 +190,120 @@ function drawScene(
   programInfo: any,
   buffers: Buffer
 ) {
-  {
-    const numComponents = 3;
-    const type = gl.FLOAT;
-    const normalize = false;
-    const stride = 0;
-    const offset = 0;
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
-    gl.vertexAttribPointer(
-      programInfo.attributes.position,
-      numComponents,
-      type,
-      normalize,
-      stride,
-      offset
-    );
-    gl.enableVertexAttribArray(programInfo.attributes.position);
-  }
-
-  {
-    const numComponents = 4;
-    const type = gl.FLOAT;
-    const normalize = false;
-    const stride = 0;
-    const offset = 0;
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color);
-    gl.vertexAttribPointer(
-      programInfo.attributes.color,
-      numComponents,
-      type,
-      normalize,
-      stride,
-      offset
-    );
-    gl.enableVertexAttribArray(programInfo.attributes.color);
-  }
-
-  {
-    const numComponents = 2;
-    const type = gl.FLOAT;
-    const normalize = false;
-    const stride = 0;
-    const offset = 0;
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.texcoord);
-    gl.vertexAttribPointer(
-      programInfo.attributes.texcoord,
-      numComponents,
-      type,
-      normalize,
-      stride,
-      offset
-    );
-    gl.enableVertexAttribArray(programInfo.attributes.texcoord);
-  }
-
-  {
-    const numComponents = 3;
-    const type = gl.FLOAT;
-    const normalize = false;
-    const stride = 0;
-    const offset = 0;
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.normal);
-    gl.vertexAttribPointer(
-      programInfo.attributes.normal,
-      numComponents,
-      type,
-      normalize,
-      stride,
-      offset
-    );
-    gl.enableVertexAttribArray(programInfo.attributes.normal);
-  }
-
-  {
-    const numComponents = 3;
-    const type = gl.FLOAT;
-    const normalize = false;
-    const stride = 0;
-    const offset = 0;
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.tangent);
-    gl.vertexAttribPointer(
-      programInfo.attributes.tangent,
-      numComponents,
-      type,
-      normalize,
-      stride,
-      offset
-    );
-    gl.enableVertexAttribArray(programInfo.attributes.tangent);
-  }
-
-  gl.useProgram(programInfo.program);
-
-  {
-    gl.activeTexture(gl.TEXTURE0);
-
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-
-    gl.uniform1i(programInfo.uniforms.uSampler, 0);
-  }
-
-  {
-    gl.activeTexture(gl.TEXTURE1);
-
-    gl.bindTexture(gl.TEXTURE_2D, textureNormal);
-
-    gl.uniform1i(programInfo.uniforms.uSamplerB, 1);
-  }
-
-  gl.uniform1f(programInfo.uniforms.time, time);
-
-  gl.uniformMatrix4fv(
-    programInfo.uniforms.uProjectionMatrix,
-    false,
-    projectionMatrix
-  );
-  gl.uniformMatrix4fv(
-    programInfo.uniforms.uModelViewMatrix,
-    false,
-    modelViewMatrix
-  );
-  gl.uniform3fv(programInfo.uniforms.uLightPosition, light.position);
-  console.log(light.position);
-  {
-    const offset = 0;
-    const vertexCount = 4;
-    gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
-  }
+  // {
+  //   const numComponents = 3;
+  //   const type = gl.FLOAT;
+  //   const normalize = false;
+  //   const stride = 0;
+  //   const offset = 0;
+  //   gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
+  //   gl.vertexAttribPointer(
+  //     programInfo.attributes.position,
+  //     numComponents,
+  //     type,
+  //     normalize,
+  //     stride,
+  //     offset
+  //   );
+  //   gl.enableVertexAttribArray(programInfo.attributes.position);
+  // }
+  // {
+  //   const numComponents = 4;
+  //   const type = gl.FLOAT;
+  //   const normalize = false;
+  //   const stride = 0;
+  //   const offset = 0;
+  //   gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color);
+  //   gl.vertexAttribPointer(
+  //     programInfo.attributes.color,
+  //     numComponents,
+  //     type,
+  //     normalize,
+  //     stride,
+  //     offset
+  //   );
+  //   gl.enableVertexAttribArray(programInfo.attributes.color);
+  // }
+  // {
+  //   const numComponents = 2;
+  //   const type = gl.FLOAT;
+  //   const normalize = false;
+  //   const stride = 0;
+  //   const offset = 0;
+  //   gl.bindBuffer(gl.ARRAY_BUFFER, buffers.texcoord);
+  //   gl.vertexAttribPointer(
+  //     programInfo.attributes.texcoord,
+  //     numComponents,
+  //     type,
+  //     normalize,
+  //     stride,
+  //     offset
+  //   );
+  //   gl.enableVertexAttribArray(programInfo.attributes.texcoord);
+  // }
+  // {
+  //   const numComponents = 3;
+  //   const type = gl.FLOAT;
+  //   const normalize = false;
+  //   const stride = 0;
+  //   const offset = 0;
+  //   gl.bindBuffer(gl.ARRAY_BUFFER, buffers.normal);
+  //   gl.vertexAttribPointer(
+  //     programInfo.attributes.normal,
+  //     numComponents,
+  //     type,
+  //     normalize,
+  //     stride,
+  //     offset
+  //   );
+  //   gl.enableVertexAttribArray(programInfo.attributes.normal);
+  // }
+  // {
+  //   const numComponents = 3;
+  //   const type = gl.FLOAT;
+  //   const normalize = false;
+  //   const stride = 0;
+  //   const offset = 0;
+  //   gl.bindBuffer(gl.ARRAY_BUFFER, buffers.tangent);
+  //   gl.vertexAttribPointer(
+  //     programInfo.attributes.tangent,
+  //     numComponents,
+  //     type,
+  //     normalize,
+  //     stride,
+  //     offset
+  //   );
+  //   gl.enableVertexAttribArray(programInfo.attributes.tangent);
+  // }
+  // gl.useProgram(programInfo.program);
+  // {
+  //   gl.activeTexture(gl.TEXTURE0);
+  //   gl.bindTexture(gl.TEXTURE_2D, texture);
+  //   gl.uniform1i(programInfo.uniforms.uSampler, 0);
+  // }
+  // {
+  //   gl.activeTexture(gl.TEXTURE1);
+  //   gl.bindTexture(gl.TEXTURE_2D, textureNormal);
+  //   gl.uniform1i(programInfo.uniforms.uSamplerB, 1);
+  // }
+  // gl.uniform1f(programInfo.uniforms.time, time);
+  // gl.uniformMatrix4fv(
+  //   programInfo.uniforms.uProjectionMatrix,
+  //   false,
+  //   projectionMatrix
+  // );
+  // gl.uniformMatrix4fv(
+  //   programInfo.uniforms.uModelViewMatrix,
+  //   false,
+  //   modelViewMatrix
+  // );
+  // gl.uniform3fv(programInfo.uniforms.uLightPosition, light.position);
+  // console.log(light.position);
+  // {
+  //   const offset = 0;
+  //   const vertexCount = 4;
+  //   gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
+  // }
 }
 
 function initBuffers(gl: WebGL2RenderingContext): Geometry {
