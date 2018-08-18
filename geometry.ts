@@ -126,66 +126,57 @@ export function createCube(gl: WebGL2RenderingContext): Buffer {
   return { attributes: {}, buffer: position, indices };
 }
 
+function getAttributesInfo(attributes: {
+  [key: string]: { data: number[]; components: number };
+}): { size: number; stride: number } {
+  let stride = 0;
+  let size = 0;
+
+  for (const name in attributes) {
+    const { components, data } = attributes[name];
+    stride += components;
+    size += data.length;
+  }
+
+  return { stride, size };
+}
+
 export function createBuff(
   gl: WebGL2RenderingContext,
   attributes: { [key: string]: { data: number[]; components: number } },
   indicies: number[] | undefined = undefined
-): Buffer {
-  const attrValues = Array.from(attributes.values());
+): { [key: string]: { offset: number; components: number } } {
+  const { stride, size } = getAttributesInfo(attributes);
 
-  const bufferSize = attrValues.reduce(
-    (size, attribute) => size + attribute.data.length,
-    0
-  );
-  const stride = attrValues.reduce(
-    (stride, attribute) => stride + attribute.components,
-    0
-  );
-
-  const array = new Array(bufferSize);
-  const bufferAttributes = new Map<
-    string,
-    { offset: number; components: number }
-  >();
+  const array = new Float32Array(size);
   let offset = 0;
+  for (const k in attributes) {
+    const attr = attributes[k];
+    let writeIdx = offset;
 
-  for (const name of attributes.keys()) {
-    const attr = attributes.get(name);
-
-    bufferAttributes.set(name, {
-      offset: offset,
-      components: attr.components
-    });
-
-    offset += attr.components;
-
-    let writeIndex = 0;
     for (let i = 0; i < attr.data.length; i++) {
-      array[writeIndex] = attr.data[i];
-
-      const strideFactor = i === 0 || i % attr.components > 1 ? 0 : 1;
-
-      if (i === 0 || i % attr.components > 0) {
-        writeIndex++;
+      array[writeIdx] = attr.data[i];
+      if (i % attr.components === attr.components - 1) {
+        writeIdx += stride - attr.components + 1;
       } else {
-        writeIndex;
+        writeIdx++;
       }
-      writeIndex += stride * strideFactor;
     }
+    offset += attr.components;
   }
 
   const buffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(
-    gl.ARRAY_BUFFER,
-    new Float32Array(Cube.positions),
-    gl.STATIC_DRAW
-  );
+  gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
 
   return { buffer, attributes: {} };
 }
 
-function bindBufferAndProgram(gl: WebGLRenderingContext, buffer: Buffer) {}
+function bindBufferAndProgram(
+  gl: WebGLRenderingContext,
+  project: WebGLProgram,
+  buffer: Buffer
+) {}
 
 function drawScene(
   gl: WebGLRenderingContext,
@@ -306,152 +297,4 @@ function drawScene(
   //   const vertexCount = 4;
   //   gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
   // }
-}
-
-function initBuffers(gl: WebGL2RenderingContext): Geometry {
-  const typedArray = new Float32Array([
-    -1.0,
-    +1.0,
-    0.0,
-    /**/ 0.0,
-    1.0,
-    /**/ 0.0,
-    1.0,
-    0.0,
-    1.0,
-    /**/ 0.0,
-    1.0,
-    0.0,
-    /**/ 0.0,
-    0.0,
-    1.0,
-    +1.0,
-    +1.0,
-    0.0,
-    /**/ 0.0,
-    1.0,
-    /**/ 0.0,
-    1.0,
-    0.0,
-    1.0,
-    /**/ 0.0,
-    1.0,
-    0.0,
-    /**/ 0.0,
-    0.0,
-    1.0,
-    -1.0,
-    -1.0,
-    0.0,
-    /**/ 0.0,
-    1.0,
-    /**/ 0.0,
-    1.0,
-    0.0,
-    1.0,
-    /**/ 0.0,
-    1.0,
-    0.0,
-    /**/ 0.0,
-    0.0,
-    1.0,
-    +1.0,
-    -1.0,
-    0.0,
-    /**/ 0.0,
-    1.0,
-    /**/ 0.0,
-    1.0,
-    0.0,
-    1.0,
-    /**/ 0.0,
-    1.0,
-    0.0,
-    /**/ 0.0,
-    0.0,
-    1.0
-  ]);
-  const buffer = gl.createBuffer();
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, typedArray, gl.STATIC_DRAW);
-
-  return {
-    typedArray,
-    buffer
-  };
-  /*
-
-    const positions = [-1.0, 1.0, 0.0,
-      1.0, 1.0, 0.0, 
-      -1.0, -1.0, 0.0,
-      1.0, -1.0, 0.0
-    ];
-  
-    const uvs = [
-      0.0, 1.0,
-      1.0, 1.0,
-      0.0, 0.0,
-      1.0, 0.0,
-    ];
-  
-    const colors = [
-      0.0, 1.0, 0.0, 1.0,
-      1.0, 0.0, 0.0, 1.0,
-      1.0, 1.0, 0.0, 1.0,
-      0.0, 1.0, 1.0, 1.0,
-    ];
-  
-    const tangents = [
-      0.0, 1.0, 0.0,
-      0.0, 1.0, 0.0,
-      0.0, 1.0, 0.0,
-      0.0, 1.0, 0.0,
-    ];
-    
-    const normals = [
-      0.0, 0.0, 1.0,
-      0.0, 0.0, 1.0,
-      0.0, 0.0, 1.0,
-      0.0, 0.0, 1.0,
-    ];
-  
-    const positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER,
-      new Float32Array(positions),
-      gl.STATIC_DRAW);
-  
-    const colorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER,
-      new Float32Array(colors),
-      gl.STATIC_DRAW);
-  
-    const uvBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER,
-      new Float32Array(uvs),
-      gl.STATIC_DRAW);
-  
-    const normalBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER,
-      new Float32Array(normals),
-      gl.STATIC_DRAW);
-  
-    const tangentBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, tangentBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER,
-      new Float32Array(tangents),
-      gl.STATIC_DRAW);
-  
-    return {
-      position: buffer,
-      color: colorBuffer,
-      uv: uvBuffer,
-      normal: normalBuffer,
-      tangent: tangentBuffer,
-    };
-    */
 }

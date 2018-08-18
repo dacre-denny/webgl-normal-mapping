@@ -297,18 +297,20 @@ async function main() {
       "uLightPosition"
     ]
   );
-
   geometry.createBuff(gl, {
     position: {
       components: 3,
-      data: [-0.5, 0.5, 0, 0.5, 0.5, 0, 0.5, -0.5, 0, -0.5, -0.5, 0]
+      data: [-0.5, 0.5, 10, 0.5, 0.5, 10, 0.5, -0.5, 10, -0.5, -0.5, 10]
     },
     normal: {
       components: 3,
-      data: [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1]
+      data: [20, 20, 21, 20, 20, 21, 20, 20, 21, 20, 20, 21]
     },
     uv: { components: 2, data: [0, 0, 1, 0, 1, 1, 0, 1] },
-    tangent: { components: 3, data: [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0] }
+    tangent: {
+      components: 3,
+      data: [91, 90, 90, 91, 90, 90, 91, 90, 90, 91, 90, 90]
+    }
   });
 
   const buffers = initBuffers(gl);
