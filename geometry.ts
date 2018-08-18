@@ -141,35 +141,37 @@ function getAttributesInfo(attributes: {
   return { stride, size };
 }
 
-export function createBuff(
+export function createInterleavedBuffer(
   gl: WebGL2RenderingContext,
   attributes: { [key: string]: { data: number[]; components: number } },
   indicies: number[] | undefined = undefined
 ): { [key: string]: { offset: number; components: number } } {
   const { stride, size } = getAttributesInfo(attributes);
-
+  const output: { [key: string]: { offset: number; components: number } } = {};
   const array = new Float32Array(size);
   let offset = 0;
-  for (const k in attributes) {
-    const attr = attributes[k];
+  for (const name in attributes) {
+    const attribute = attributes[name];
     let writeIdx = offset;
 
-    for (let i = 0; i < attr.data.length; i++) {
-      array[writeIdx] = attr.data[i];
-      if (i % attr.components === attr.components - 1) {
-        writeIdx += stride - attr.components + 1;
+    output[name] = { offset, components: attribute.components };
+
+    for (let i = 0; i < attribute.data.length; i++) {
+      array[writeIdx] = attribute.data[i];
+      if (i % attribute.components === attribute.components - 1) {
+        writeIdx += stride - attribute.components + 1;
       } else {
         writeIdx++;
       }
     }
-    offset += attr.components;
+    offset += attribute.components;
   }
 
   const buffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
 
-  return { buffer, attributes: {} };
+  return { buffer, attributes: output };
 }
 
 function bindBufferAndProgram(

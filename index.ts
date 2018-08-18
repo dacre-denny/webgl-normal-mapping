@@ -297,7 +297,8 @@ async function main() {
       "uLightPosition"
     ]
   );
-  geometry.createBuff(gl, {
+  debugger;
+  const x = geometry.createInterleavedBuffer(gl, {
     position: {
       components: 3,
       data: [-0.5, 0.5, 10, 0.5, 0.5, 10, 0.5, -0.5, 10, -0.5, -0.5, 10]
