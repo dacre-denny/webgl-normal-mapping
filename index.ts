@@ -11,7 +11,7 @@ const camera = {
 const light = {
   position: [1.5, 0.0, 0.0]
 };
-
+/*
 document.addEventListener("keydown", event => {
   switch (event.keyCode) {
     case 87: {
@@ -44,6 +44,7 @@ document.addEventListener("mousemove", (event: MouseEvent) => {
     vec3.rotateY(light.position, light.position, [0, 0, 0], t);
   }
 });
+*/
 
 function initBuffers(gl) {
   const positions = [
@@ -301,18 +302,20 @@ async function main() {
   const quad = geometry.createInterleavedBuffer(gl, {
     position: {
       components: 3,
-      data: [-0.5, 0.5, 0, 0.5, 0.5, 0, 0.5, -0.5, 0, -0.5, -0.5, 0]
+      data: [-0.5, 0.5, 0, 0.5, 0.5, 0, 0.5, -0.5, 0]
     },
     normal: {
       components: 3,
-      data: [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1]
+      data: [0, 0, 1, 0, 0, 1, 0, 0, 1]
     },
-    texcoord: { components: 2, data: [0, 0, 1, 0, 1, 1, 0, 1] },
-    tangent: { components: 3, data: [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0] }
+    texcoord: { components: 2, data: [0, 0, 1, 0, 1, 1] },
+    tangent: { components: 3, data: [1, 0, 0, 1, 0, 0, 1, 0, 0] }
   });
 
   geometry.bindBufferAndProgram(gl, shaderProgram, quad);
   geometry.drawBuffer(gl, quad);
+
+  return;
 
   const buffers = initBuffers(gl);
   let t = 0.0;

@@ -1,7 +1,7 @@
 precision highp float;
 
 attribute vec4 position;
-attribute vec4 color;
+// attribute vec4 color;
 attribute vec2 texcoord;
 attribute vec3 normal;
 attribute vec3 tangent;
@@ -18,7 +18,7 @@ varying vec4 vPosition;
 
 void main() { 
 
-    vColor = color;
+    vColor = vec4(1.0,0.0,0.0,1.0);
     vNormal = normal;
     vTangent = tangent;
     vTextureCoord = texcoord;

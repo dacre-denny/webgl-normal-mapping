@@ -1,6 +1,6 @@
 import { vec3 } from "gl-matrix";
 import { Shader } from "./shader";
-import * as Cube from "./cube.json";
+// import * as Cube from "./cube.json";
 
 function render(
   gl: WebGL2RenderingContext,
@@ -129,7 +129,6 @@ export function bindBufferAndProgram(
   shader: Shader,
   geometry: Geometry
 ) {
-  debugger;
   gl.bindBuffer(gl.ARRAY_BUFFER, geometry.buffer);
 
   for (const name in geometry.attributes) {
@@ -146,6 +145,15 @@ export function bindBufferAndProgram(
       attribute.offset
     );
 
+    console.log(
+      index,
+      attribute.components,
+      gl.FLOAT,
+      false,
+      geometry.stride,
+      attribute.offset
+    );
+
     gl.enableVertexAttribArray(index);
   }
 
@@ -153,7 +161,7 @@ export function bindBufferAndProgram(
 }
 
 export function drawBuffer(gl: WebGLRenderingContext, geometry: Geometry) {
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, geometry.count);
+  gl.drawArrays(gl.TRIANGLES, 0, 1); //geometry.count);
 
   // {
   //   const numComponents = 3;
