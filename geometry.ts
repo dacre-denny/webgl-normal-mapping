@@ -7,7 +7,6 @@ interface Geometry {
   typedArray: Float32Array;
 }
 
-
 function render(
   gl: WebGL2RenderingContext,
   geometry: Geometry,
@@ -129,8 +128,8 @@ export function createCube(gl: WebGL2RenderingContext): Buffer {
 
 export function createBuff(
   gl: WebGL2RenderingContext,
-  attributes: Map<string, { components: number; data: number[] }>,
-  indicies: number[]
+  attributes: { [key: string]: { data: number[]; components: number } },
+  indicies: number[] | undefined = undefined
 ): Buffer {
   const attrValues = Array.from(attributes.values());
 
@@ -153,7 +152,10 @@ export function createBuff(
   for (const name of attributes.keys()) {
     const attr = attributes.get(name);
 
-    bufferAttributes.set(name, { offset: offset, components: attr.components });
+    bufferAttributes.set(name, {
+      offset: offset,
+      components: attr.components
+    });
 
     offset += attr.components;
 

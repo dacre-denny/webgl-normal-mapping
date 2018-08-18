@@ -28,7 +28,17 @@ export async function loadProgram(
     );
     return null;
   }
-
+  /*
+  //gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+  for (
+    let i = 0;
+    i < gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+    i++
+  ) {
+    const attributeInfo = gl.getActiveAttrib(program, i);
+    debugger;
+  }
+*/
   const attributes: any = {};
   const uniforms: any = {};
 

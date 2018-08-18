@@ -1,6 +1,7 @@
 import { mat4, vec3 } from "gl-matrix";
 import * as shader from "./shader";
 import * as textures from "./texture";
+import * as geometry from "./geometry";
 
 const camera = {
   position: [0, 0, 3],
@@ -296,6 +297,19 @@ async function main() {
       "uLightPosition"
     ]
   );
+
+  geometry.createBuff(gl, {
+    position: {
+      components: 3,
+      data: [-0.5, 0.5, 0, 0.5, 0.5, 0, 0.5, -0.5, 0, -0.5, -0.5, 0]
+    },
+    normal: {
+      components: 3,
+      data: [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1]
+    },
+    uv: { components: 2, data: [0, 0, 1, 0, 1, 1, 0, 1] },
+    tangent: { components: 3, data: [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0] }
+  });
 
   const buffers = initBuffers(gl);
   let t = 0.0;
