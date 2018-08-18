@@ -297,22 +297,22 @@ async function main() {
       "uLightPosition"
     ]
   );
-  debugger;
-  const x = geometry.createInterleavedBuffer(gl, {
+
+  const quad = geometry.createInterleavedBuffer(gl, {
     position: {
       components: 3,
-      data: [-0.5, 0.5, 10, 0.5, 0.5, 10, 0.5, -0.5, 10, -0.5, -0.5, 10]
+      data: [-0.5, 0.5, 0, 0.5, 0.5, 0, 0.5, -0.5, 0, -0.5, -0.5, 0]
     },
     normal: {
       components: 3,
-      data: [20, 20, 21, 20, 20, 21, 20, 20, 21, 20, 20, 21]
+      data: [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1]
     },
-    uv: { components: 2, data: [0, 0, 1, 0, 1, 1, 0, 1] },
-    tangent: {
-      components: 3,
-      data: [91, 90, 90, 91, 90, 90, 91, 90, 90, 91, 90, 90]
-    }
+    texcoord: { components: 2, data: [0, 0, 1, 0, 1, 1, 0, 1] },
+    tangent: { components: 3, data: [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0] }
   });
+
+  geometry.bindBufferAndProgram(gl, shaderProgram, quad);
+  geometry.drawBuffer(gl, quad);
 
   const buffers = initBuffers(gl);
   let t = 0.0;

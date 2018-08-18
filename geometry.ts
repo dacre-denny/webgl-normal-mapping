@@ -2,11 +2,6 @@ import { vec3 } from "gl-matrix";
 import { Shader } from "./shader";
 import * as Cube from "./cube.json";
 
-interface Geometry {
-  buffer: WebGLBuffer;
-  typedArray: Float32Array;
-}
-
 function render(
   gl: WebGL2RenderingContext,
   geometry: Geometry,
@@ -72,58 +67,12 @@ function render(
   gl.enableVertexAttribArray(shader.attributes.tangent);
 }
 
-interface Buffer {
+interface Geometry {
   attributes: { [key: string]: { offset: number; components: number } };
+  stride: number;
+  count: number;
   buffer: WebGLBuffer;
   indices?: WebGLBuffer;
-}
-
-export function createCube(gl: WebGL2RenderingContext): Buffer {
-  const position = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, position);
-  gl.bufferData(
-    gl.ARRAY_BUFFER,
-    new Float32Array(Cube.positions),
-    gl.STATIC_DRAW
-  );
-
-  const normal = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, normal);
-  gl.bufferData(
-    gl.ARRAY_BUFFER,
-    new Float32Array(Cube.normals),
-    gl.STATIC_DRAW
-  );
-
-  const tangent = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, tangent);
-  gl.bufferData(
-    gl.ARRAY_BUFFER,
-    new Float32Array(Cube.tangents),
-    gl.STATIC_DRAW
-  );
-
-  const texcoord = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, texcoord);
-  gl.bufferData(
-    gl.ARRAY_BUFFER,
-    new Float32Array(Cube.texcoords),
-    gl.STATIC_DRAW
-  );
-
-  const color = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, color);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(Cube.colors), gl.STATIC_DRAW);
-
-  const indices = gl.createBuffer();
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices);
-  gl.bufferData(
-    gl.ELEMENT_ARRAY_BUFFER,
-    new Uint16Array(Cube.indices),
-    gl.STATIC_DRAW
-  );
-
-  return { attributes: {}, buffer: position, indices };
 }
 
 function getAttributesInfo(attributes: {
@@ -145,11 +94,12 @@ export function createInterleavedBuffer(
   gl: WebGL2RenderingContext,
   attributes: { [key: string]: { data: number[]; components: number } },
   indicies: number[] | undefined = undefined
-): { [key: string]: { offset: number; components: number } } {
+): Geometry {
   const { stride, size } = getAttributesInfo(attributes);
   const output: { [key: string]: { offset: number; components: number } } = {};
   const array = new Float32Array(size);
   let offset = 0;
+
   for (const name in attributes) {
     const attribute = attributes[name];
     let writeIdx = offset;
@@ -171,20 +121,40 @@ export function createInterleavedBuffer(
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
 
-  return { buffer, attributes: output };
+  return { buffer, attributes: output, stride, count: size / stride };
 }
 
-function bindBufferAndProgram(
+export function bindBufferAndProgram(
   gl: WebGLRenderingContext,
-  project: WebGLProgram,
-  buffer: Buffer
-) {}
-
-function drawScene(
-  gl: WebGLRenderingContext,
-  programInfo: any,
-  buffers: Buffer
+  shader: Shader,
+  geometry: Geometry
 ) {
+  debugger;
+  gl.bindBuffer(gl.ARRAY_BUFFER, geometry.buffer);
+
+  for (const name in geometry.attributes) {
+    const attribute = geometry.attributes[name];
+
+    const index = gl.getAttribLocation(shader.program, name);
+
+    gl.vertexAttribPointer(
+      index,
+      attribute.components,
+      gl.FLOAT,
+      false,
+      geometry.stride,
+      attribute.offset
+    );
+
+    gl.enableVertexAttribArray(index);
+  }
+
+  gl.useProgram(shader.program);
+}
+
+export function drawBuffer(gl: WebGLRenderingContext, geometry: Geometry) {
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, geometry.count);
+
   // {
   //   const numComponents = 3;
   //   const type = gl.FLOAT;
