@@ -55,7 +55,23 @@ export function createInterleavedBuffer(
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
 
-  return { buffer, attributes: output, stride, count: size / stride };
+  const indexArray = new Uint16Array(indicies);
+
+  let indexBuffer = undefined;
+
+  if (indicies) {
+    indexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexArray, gl.STATIC_DRAW);
+  }
+
+  return {
+    buffer,
+    attributes: output,
+    stride,
+    count: indicies.length / 3,
+    indices: indexBuffer
+  };
 }
 
 export function bindBufferAndProgram(
@@ -82,9 +98,17 @@ export function bindBufferAndProgram(
     gl.enableVertexAttribArray(index);
   }
 
+  if (geometry.indices) {
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, geometry.indices);
+  }
+
   gl.useProgram(shader.program);
 }
 
 export function drawBuffer(gl: WebGLRenderingContext, geometry: Geometry) {
-  gl.drawArrays(gl.TRIANGLES, 0, geometry.count);
+  if (geometry.indices) {
+    gl.drawElements(gl.TRIANGLES, geometry.count * 3, gl.UNSIGNED_SHORT, 0);
+  } else {
+    gl.drawArrays(gl.TRIANGLES, 0, geometry.count);
+  }
 }

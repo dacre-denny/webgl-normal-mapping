@@ -35,6 +35,7 @@ document.addEventListener("keydown", event => {
   }
 });
 
+*/
 document.addEventListener("mousemove", (event: MouseEvent) => {
   const t = (5 * event.movementX) / document.body.clientWidth;
 
@@ -44,228 +45,6 @@ document.addEventListener("mousemove", (event: MouseEvent) => {
     vec3.rotateY(light.position, light.position, [0, 0, 0], t);
   }
 });
-*/
-
-function initBuffers(gl) {
-  const positions = [
-    -1.0,
-    1.0,
-    0.0,
-    1.0,
-    1.0,
-    0.0,
-    -1.0,
-    -1.0,
-    0.0,
-    1.0,
-    -1.0,
-    0.0
-  ];
-
-  const uvs = [0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0];
-
-  const colors = [
-    0.0,
-    1.0,
-    0.0,
-    1.0,
-    1.0,
-    0.0,
-    0.0,
-    1.0,
-    1.0,
-    1.0,
-    0.0,
-    1.0,
-    0.0,
-    1.0,
-    1.0,
-    1.0
-  ];
-
-  const tangents = [0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0];
-
-  const normals = [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0];
-
-  const positionBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-
-  const colorBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-
-  const uvBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(uvs), gl.STATIC_DRAW);
-
-  const normalBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
-
-  const tangentBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, tangentBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tangents), gl.STATIC_DRAW);
-
-  return {
-    position: positionBuffer,
-    color: colorBuffer,
-    uv: uvBuffer,
-    normal: normalBuffer,
-    tangent: tangentBuffer
-  };
-}
-
-function drawScene(gl, programInfo, buffers, texture, textureNormal, time) {
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);
-  gl.clearDepth(1.0);
-  gl.enable(gl.DEPTH_TEST);
-  gl.depthFunc(gl.LEQUAL);
-
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-  const fieldOfView = (45 * Math.PI) / 180; // in radians
-  const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-  const zNear = 0.1;
-  const zFar = 100.0;
-  const projectionMatrix = mat4.create();
-  mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
-
-  const modelViewMatrix = mat4.create();
-  mat4.lookAt(modelViewMatrix, camera.position, camera.lookat, [0, 1, 0]);
-
-  const modelRotation = mat4.create();
-  mat4.fromZRotation(modelRotation, time);
-
-  {
-    const numComponents = 3;
-    const type = gl.FLOAT;
-    const normalize = false;
-    const stride = 0;
-    const offset = 0;
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
-    gl.vertexAttribPointer(
-      programInfo.attributes.position,
-      numComponents,
-      type,
-      normalize,
-      stride,
-      offset
-    );
-    gl.enableVertexAttribArray(programInfo.attributes.position);
-  }
-
-  {
-    const numComponents = 4;
-    const type = gl.FLOAT;
-    const normalize = false;
-    const stride = 0;
-    const offset = 0;
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color);
-    gl.vertexAttribPointer(
-      programInfo.attributes.color,
-      numComponents,
-      type,
-      normalize,
-      stride,
-      offset
-    );
-    gl.enableVertexAttribArray(programInfo.attributes.color);
-  }
-
-  {
-    const numComponents = 2;
-    const type = gl.FLOAT;
-    const normalize = false;
-    const stride = 0;
-    const offset = 0;
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.uv);
-    gl.vertexAttribPointer(
-      programInfo.attributes.texcoord,
-      numComponents,
-      type,
-      normalize,
-      stride,
-      offset
-    );
-    gl.enableVertexAttribArray(programInfo.attributes.texcoord);
-  }
-
-  {
-    const numComponents = 3;
-    const type = gl.FLOAT;
-    const normalize = false;
-    const stride = 0;
-    const offset = 0;
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.normal);
-    gl.vertexAttribPointer(
-      programInfo.attributes.normal,
-      numComponents,
-      type,
-      normalize,
-      stride,
-      offset
-    );
-    gl.enableVertexAttribArray(programInfo.attributes.normal);
-  }
-
-  {
-    const numComponents = 3;
-    const type = gl.FLOAT;
-    const normalize = false;
-    const stride = 0;
-    const offset = 0;
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.tangent);
-    gl.vertexAttribPointer(
-      programInfo.attributes.tangent,
-      numComponents,
-      type,
-      normalize,
-      stride,
-      offset
-    );
-    gl.enableVertexAttribArray(programInfo.attributes.tangent);
-  }
-
-  gl.useProgram(programInfo.program);
-
-  {
-    gl.activeTexture(gl.TEXTURE0);
-
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-
-    gl.uniform1i(programInfo.uniforms.uSampler, 0);
-  }
-
-  {
-    gl.activeTexture(gl.TEXTURE1);
-
-    gl.bindTexture(gl.TEXTURE_2D, textureNormal);
-
-    gl.uniform1i(programInfo.uniforms.uSamplerB, 1);
-  }
-
-  gl.uniform1f(programInfo.uniforms.time, time);
-
-  gl.uniformMatrix4fv(
-    programInfo.uniforms.uProjectionMatrix,
-    false,
-    projectionMatrix
-  );
-  gl.uniformMatrix4fv(
-    programInfo.uniforms.uModelViewMatrix,
-    false,
-    modelViewMatrix
-  );
-  gl.uniform3fv(programInfo.uniforms.uLightPosition, light.position);
-  console.log(light.position);
-  {
-    const offset = 0;
-    const vertexCount = 4;
-    gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
-  }
-}
 
 async function main() {
   const canvas = document.querySelector("canvas");
@@ -299,18 +78,22 @@ async function main() {
     ]
   );
 
-  const quad = geometry.createInterleavedBuffer(gl, {
-    position: {
-      components: 3,
-      data: [-0.5, 0.5, 0, 0.5, 0.5, 0, 0.5, -0.5, 0]
+  const quad = geometry.createInterleavedBuffer(
+    gl,
+    {
+      position: {
+        components: 3,
+        data: [-0.5, 0.5, 0, 0.5, 0.5, 0, 0.5, -0.5, 0, -0.5, -0.5, 0]
+      },
+      normal: {
+        components: 3,
+        data: [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1]
+      },
+      texcoord: { components: 2, data: [0, 0, 1, 0, 1, 1, 0, 1] },
+      tangent: { components: 3, data: [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0] }
     },
-    normal: {
-      components: 3,
-      data: [0, 0, 1, 0, 0, 1, 0, 0, 1]
-    },
-    texcoord: { components: 2, data: [0, 0, 1, 0, 1, 1] },
-    tangent: { components: 3, data: [1, 0, 0, 1, 0, 0, 1, 0, 0] }
-  });
+    [0, 1, 2, 0, 2, 3]
+  );
 
   geometry.bindBufferAndProgram(gl, shaderProgram, quad);
   geometry.drawBuffer(gl, quad);
