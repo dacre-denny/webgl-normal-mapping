@@ -315,13 +315,76 @@ async function main() {
   geometry.bindBufferAndProgram(gl, shaderProgram, quad);
   geometry.drawBuffer(gl, quad);
 
-  return;
+  const modelViewMatrix = mat4.create();
+  mat4.lookAt(modelViewMatrix, camera.position, camera.lookat, [0, 1, 0]);
 
-  const buffers = initBuffers(gl);
-  let t = 0.0;
+  // shader.updateUniforms(gl, shaderProgram, {
+  //   uModelViewMatrix: modelViewMatrix
+  // });
+
+  // const buffers = initBuffers(gl);
+  let time = 0.0;
 
   function render() {
-    drawScene(gl, shaderProgram, buffers, texture, textureNormal, (t += 0.01));
+    time += 0.01;
+
+    //drawScene(gl, shaderProgram, buffers, texture, textureNormal, (t += 0.01));
+
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearDepth(1.0);
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    const fieldOfView = (45 * Math.PI) / 180; // in radians
+    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+    const zNear = 0.1;
+    const zFar = 100.0;
+    const projectionMatrix = mat4.create();
+    mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
+
+    const modelViewMatrix = mat4.create();
+    mat4.lookAt(modelViewMatrix, camera.position, camera.lookat, [0, 1, 0]);
+
+    const modelRotation = mat4.create();
+    mat4.fromZRotation(modelRotation, time);
+
+    geometry.bindBufferAndProgram(gl, shaderProgram, quad);
+
+    gl.useProgram(shaderProgram.program);
+
+    {
+      gl.activeTexture(gl.TEXTURE0);
+
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+
+      gl.uniform1i(shaderProgram.uniforms.uSampler, 0);
+    }
+
+    {
+      gl.activeTexture(gl.TEXTURE1);
+
+      gl.bindTexture(gl.TEXTURE_2D, textureNormal);
+
+      gl.uniform1i(shaderProgram.uniforms.uSamplerB, 1);
+    }
+
+    gl.uniform1f(shaderProgram.uniforms.time, time);
+
+    gl.uniformMatrix4fv(
+      shaderProgram.uniforms.uProjectionMatrix,
+      false,
+      projectionMatrix
+    );
+    gl.uniformMatrix4fv(
+      shaderProgram.uniforms.uModelViewMatrix,
+      false,
+      modelViewMatrix
+    );
+    gl.uniform3fv(shaderProgram.uniforms.uLightPosition, light.position);
+
+    geometry.drawBuffer(gl, quad);
 
     requestAnimationFrame(render);
   }
