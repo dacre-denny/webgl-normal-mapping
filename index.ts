@@ -66,16 +66,16 @@ async function main() {
   const shaderProgram = await shader.loadProgram(
     gl,
     "./shaders/basic.vs",
-    "./shaders/basic.fs",
-    ["position", "color", "texcoord", "normal", "tangent"],
-    [
-      "uProjectionMatrix",
-      "uModelViewMatrix",
-      "uSampler",
-      "uSamplerB",
-      "time",
-      "uLightPosition"
-    ]
+    "./shaders/basic.fs"
+    //["position", "color", "texcoord", "normal", "tangent"],
+    // [
+    //   "uProjectionMatrix",
+    //   "uModelViewMatrix",
+    //   "uSampler",
+    //   "uSamplerB",
+    //   "time",
+    //   "uLightPosition"
+    // ]
   );
 
   const quad = geometry.createInterleavedBuffer(

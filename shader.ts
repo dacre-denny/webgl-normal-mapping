@@ -2,7 +2,7 @@ import { mat3, mat4, vec2, vec3, vec4 } from "gl-matrix";
 
 export interface Shader {
   program: WebGLProgram;
-  attributes: any;
+  //attributes: any;
   uniforms: any;
 }
 
@@ -47,9 +47,7 @@ export function updateUniforms(
 export async function loadProgram(
   gl: WebGL2RenderingContext,
   vsSource: string,
-  fsSource: string,
-  attributeNames: string[],
-  uniformNames: string[]
+  fsSource: string
 ) {
   const vertexShader = await loadShader(gl, gl.VERTEX_SHADER, vsSource);
   const fragmentShader = await loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
@@ -68,32 +66,9 @@ export async function loadProgram(
     );
     return null;
   }
-  /*
-  //gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
-  for (
-    let i = 0;
-    i < gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
-    i++
-  ) {
-    const attributeInfo = gl.getActiveAttrib(program, i);
-    debugger;
-  }
-*/
-  const attributes: any = {};
-  const uniforms: any = {};
-
-  attributeNames.forEach(attribute => {
-    attributes[attribute] = gl.getAttribLocation(program, attribute);
-  });
-
-  uniformNames.forEach(uniform => {
-    uniforms[uniform] = gl.getUniformLocation(program, uniform);
-  });
 
   return <Shader>{
-    program: program,
-    attributes: attributes,
-    uniforms: uniforms
+    program: program
   };
 }
 
