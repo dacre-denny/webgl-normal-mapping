@@ -1,45 +1,109 @@
 import { mat3, mat4, vec2, vec3, vec4 } from "gl-matrix";
 
+const FLOAT = 0x1406;
+const FLOAT_VEC2 = 0x8b50;
+const FLOAT_VEC3 = 0x8b51;
+const FLOAT_VEC4 = 0x8b52;
+const INT = 0x1404;
+const INT_VEC2 = 0x8b53;
+const INT_VEC3 = 0x8b54;
+const INT_VEC4 = 0x8b55;
+const BOOL = 0x8b56;
+const BOOL_VEC2 = 0x8b57;
+const BOOL_VEC3 = 0x8b58;
+const BOOL_VEC4 = 0x8b59;
+const FLOAT_MAT2 = 0x8b5a;
+const FLOAT_MAT3 = 0x8b5b;
+const FLOAT_MAT4 = 0x8b5c;
+const SAMPLER_2D = 0x8b5e;
+const SAMPLER_CUBE = 0x8b60;
+const SAMPLER_3D = 0x8b5f;
+const SAMPLER_2D_SHADOW = 0x8b62;
+const FLOAT_MAT2x3 = 0x8b65;
+const FLOAT_MAT2x4 = 0x8b66;
+const FLOAT_MAT3x2 = 0x8b67;
+const FLOAT_MAT3x4 = 0x8b68;
+const FLOAT_MAT4x2 = 0x8b69;
+const FLOAT_MAT4x3 = 0x8b6a;
+const SAMPLER_2D_ARRAY = 0x8dc1;
+const SAMPLER_2D_ARRAY_SHADOW = 0x8dc4;
+const SAMPLER_CUBE_SHADOW = 0x8dc5;
+const UNSIGNED_INT = 0x1405;
+const UNSIGNED_INT_VEC2 = 0x8dc6;
+const UNSIGNED_INT_VEC3 = 0x8dc7;
+const UNSIGNED_INT_VEC4 = 0x8dc8;
+const INT_SAMPLER_2D = 0x8dca;
+const INT_SAMPLER_3D = 0x8dcb;
+const INT_SAMPLER_CUBE = 0x8dcc;
+const INT_SAMPLER_2D_ARRAY = 0x8dcf;
+const UNSIGNED_INT_SAMPLER_2D = 0x8dd2;
+const UNSIGNED_INT_SAMPLER_3D = 0x8dd3;
+const UNSIGNED_INT_SAMPLER_CUBE = 0x8dd4;
+const UNSIGNED_INT_SAMPLER_2D_ARRAY = 0x8dd7;
+
+const TEXTURE_2D = 0x0de1;
+const TEXTURE_CUBE_MAP = 0x8513;
+const TEXTURE_3D = 0x806f;
+const TEXTURE_2D_ARRAY = 0x8c1a;
+
+const types = {};
+types[FLOAT] = (gl: WebGL2RenderingContext) => gl.uniform1f;
+types[FLOAT_VEC2] = (gl: WebGL2RenderingContext) => gl.uniform2fv;
+types[FLOAT_VEC3] = (gl: WebGL2RenderingContext) => gl.uniform3fv;
+types[FLOAT_VEC4] = (gl: WebGL2RenderingContext) => gl.uniform4fv;
+types[FLOAT_MAT2] = (gl: WebGL2RenderingContext) => gl.uniformMatrix2fv;
+types[FLOAT_MAT3] = (gl: WebGL2RenderingContext) => gl.uniformMatrix3fv;
+types[FLOAT_MAT4] = (gl: WebGL2RenderingContext) => gl.uniformMatrix4fv;
+
+types[SAMPLER_2D] = (gl: WebGL2RenderingContext) => {
+  return function(
+    location: WebGLUniformLocation,
+    texture: WebGLTexture,
+    unit: number
+  ) {
+    gl.uniform1i(location, unit);
+
+    gl.activeTexture(gl.TEXTURE0 + unit);
+
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+  };
+};
+
+function isWebGl(info: WebGLActiveInfo) {
+  const name = info.name.toLocaleLowerCase();
+  return name.startsWith("gl_") || name.startsWith("webgl_");
+}
+
 export interface Shader {
   program: WebGLProgram;
   //attributes: any;
   uniforms: any;
 }
 
-export type UniformType = mat3 | mat4 | vec2 | vec3 | vec4 | number;
-
 export function updateUniforms(
   gl: WebGL2RenderingContext,
   shader: Shader,
-  attributes: { [key: string]: UniformType }
+  attributes: { [key: string]: any }
 ) {
-  for (const name in attributes) {
-    const value = attributes[name];
-    const index = gl.getUniformLocation(shader.program, name);
+  gl.useProgram(shader.program);
 
-    if (value instanceof mat3) {
-      gl.uniformMatrix3fv(index, false, value as mat3);
+  const n = gl.getProgramParameter(shader.program, gl.ACTIVE_UNIFORMS);
+  for (let i = 0; i < n; i++) {
+    const info = gl.getActiveUniform(shader.program, i);
+    if (isWebGl(info)) {
       continue;
     }
-    if (value instanceof mat4) {
-      gl.uniformMatrix4fv(index, false, value as mat4);
+
+    const value = attributes[info.name];
+    if (!value) {
       continue;
     }
-    if (value instanceof Number) {
-      gl.uniform1f(index, value as number);
-      continue;
-    }
-    if (value instanceof vec2) {
-      gl.uniform2fv(index, value as vec2);
-      continue;
-    }
-    if (value instanceof vec3) {
-      gl.uniform3fv(index, value as vec3);
-      continue;
-    }
-    if (value instanceof vec4) {
-      gl.uniform4fv(index, value as vec4);
-      continue;
+
+    const uniformSetter = types[info.type] as any;
+
+    if (uniformSetter) {
+      const index = gl.getUniformLocation(shader.program, info.name);
+      uniformSetter(index, value);
     }
   }
 }

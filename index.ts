@@ -4,13 +4,17 @@ import * as textures from "./texture";
 import * as geometry from "./geometry";
 
 const camera = {
-  position: [0, 0, 3],
-  lookat: [0, 0, 0]
+  position: vec3.create(),
+  lookat: vec3.create()
 };
 
+camera.position.set([0, 0, 3]);
+camera.position.set([0, 0, 0]);
+
 const light = {
-  position: [1.5, 0.0, 0.0]
+  position: vec3.create()
 };
+light.position.set([1.5, 0, 0]);
 /*
 document.addEventListener("keydown", event => {
   switch (event.keyCode) {
@@ -135,8 +139,17 @@ async function main() {
 
     geometry.bindBufferAndProgram(gl, shaderProgram, quad);
 
-    gl.useProgram(shaderProgram.program);
+    shader.updateUniforms(gl, shaderProgram, {
+      uSampler: texture,
+      uSamplerB: textureNormal,
+      time: time,
+      uProjectionMatrix: projectionMatrix,
+      uModelViewMatrix: modelViewMatrix,
+      uLightPosition: light.position
+    });
 
+    gl.useProgram(shaderProgram.program);
+    /*
     {
       gl.activeTexture(gl.TEXTURE0);
 
@@ -166,7 +179,7 @@ async function main() {
       modelViewMatrix
     );
     gl.uniform3fv(shaderProgram.uniforms.uLightPosition, light.position);
-
+*/
     geometry.drawBuffer(gl, quad);
 
     requestAnimationFrame(render);
