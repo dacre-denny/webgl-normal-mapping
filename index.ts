@@ -10,7 +10,7 @@ const camera = {
   lookat: vec3.create()
 };
 
-camera.position.set([0, 0, 5]);
+camera.position.set([1, 1, 5]);
 camera.lookat.set([0, 0, 0]);
 
 const light = {
@@ -69,22 +69,34 @@ async function main() {
     "./textures/metal-normal.png"
   );
 
-  const shaderProgram = await shader.loadProgram(
+  const cubeShader = await shader.loadProgram(
     gl,
     "./shaders/basic.vs",
     "./shaders/basic.fs"
-    //["position", "color", "texcoord", "normal", "tangent"],
-    // [
-    //   "uProjectionMatrix",
-    //   "uModelViewMatrix",
-    //   "uSampler",
-    //   "uSamplerB",
-    //   "time",
-    //   "uLightPosition"
-    // ]
   );
 
-  const quad = geometry.createInterleavedBuffer(
+  const axisShader = await shader.loadProgram(
+    gl,
+    "./shaders/axis.vs",
+    "./shaders/axis.fs"
+  );
+
+  const axisGeometry = geometry.createInterleavedBuffer(
+    gl,
+    {
+      position: {
+        components: 3,
+        data: [0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 5]
+      },
+      color: {
+        components: 3,
+        data: [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1]
+      }
+    },
+    [0, 1, 2, 3, 4, 5]
+  );
+
+  const cubeGeometry = geometry.createInterleavedBuffer(
     gl,
     {
       position: {
@@ -106,9 +118,6 @@ async function main() {
     },
     cube.indices
   );
-
-  geometry.bindBufferAndProgram(gl, shaderProgram, quad);
-  geometry.drawBuffer(gl, quad);
 
   const modelViewMatrix = mat4.create();
   mat4.lookAt(modelViewMatrix, camera.position, camera.lookat, [0, 1, 0]);
@@ -138,9 +147,10 @@ async function main() {
     const modelRotation = mat4.create();
     mat4.fromZRotation(modelRotation, time);
 
-    gl.useProgram(shaderProgram.program);
+    /***/
+    gl.useProgram(cubeShader.program);
 
-    shader.updateUniforms(gl, shaderProgram, {
+    shader.updateUniforms(gl, cubeShader, {
       uSamplerB: textureNormal,
       uSampler: texture,
       time: time,
@@ -149,9 +159,27 @@ async function main() {
       uLightPosition: light.position
     });
 
-    geometry.bindBufferAndProgram(gl, shaderProgram, quad);
+    geometry.bindBufferAndProgram(gl, cubeShader, cubeGeometry);
 
-    geometry.drawBuffer(gl, quad);
+    geometry.drawBuffer(gl, cubeGeometry);
+    ///
+
+    gl.useProgram(axisShader.program);
+
+    shader.updateUniforms(gl, axisShader, {
+      uSamplerB: textureNormal,
+      uSampler: texture,
+      time: time,
+      uProjectionMatrix: projectionMatrix,
+      uModelViewMatrix: modelViewMatrix,
+      uLightPosition: light.position
+    });
+
+    geometry.bindBufferAndProgram(gl, axisShader, axisGeometry);
+
+    geometry.drawBuffer(gl, axisGeometry, gl.LINES);
+
+    ///
 
     requestAnimationFrame(render);
   }

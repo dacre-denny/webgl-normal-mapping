@@ -1,4 +1,3 @@
-import { vec3 } from "gl-matrix";
 import { Shader } from "./shader";
 
 interface Geometry {
@@ -109,10 +108,14 @@ export function bindBufferAndProgram(
   gl.useProgram(shader.program);
 }
 
-export function drawBuffer(gl: WebGLRenderingContext, geometry: Geometry) {
+export function drawBuffer(
+  gl: WebGLRenderingContext,
+  geometry: Geometry,
+  mode: number = gl.TRIANGLES
+) {
   if (geometry.indices) {
-    gl.drawElements(gl.TRIANGLES, geometry.count * 3, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(mode, geometry.count * 3, gl.UNSIGNED_SHORT, 0);
   } else {
-    gl.drawArrays(gl.TRIANGLES, 0, geometry.count);
+    gl.drawArrays(mode, 0, geometry.count);
   }
 }
