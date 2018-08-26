@@ -15,7 +15,7 @@ uniform float time;
 uniform vec3 uLightPosition;
 
 void main() {
-/*
+  
   vec3 lightDirection = normalize(vPosition.xyz - uLightPosition);
 
   vec3 normal = normalize(vNormal);
@@ -29,7 +29,6 @@ void main() {
   vec3 tangentNormal = tangentSpace * texelNormal;
 
   float diffuse = max(0.11, dot(lightDirection, tangentNormal));
-  */
-
-  gl_FragColor = texture2D(uSampler, vTextureCoord);//vec4(1.0, 0.0, 0.0, 1.0); // texture2D(uSampler, vTextureCoord) * vec4(diffuse,diffuse,diffuse,1.0);
+  
+  gl_FragColor = texture2D(uSampler, vTextureCoord) * vec4(diffuse,diffuse,diffuse,1.0);
 }

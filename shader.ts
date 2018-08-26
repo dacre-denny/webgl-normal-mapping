@@ -46,29 +46,6 @@ const TEXTURE_CUBE_MAP = 0x8513;
 const TEXTURE_3D = 0x806f;
 const TEXTURE_2D_ARRAY = 0x8c1a;
 
-const types = {};
-types[FLOAT] = (gl: WebGL2RenderingContext) => gl.uniform1f;
-types[FLOAT_VEC2] = (gl: WebGL2RenderingContext) => gl.uniform2fv;
-types[FLOAT_VEC3] = (gl: WebGL2RenderingContext) => gl.uniform3fv;
-types[FLOAT_VEC4] = (gl: WebGL2RenderingContext) => gl.uniform4fv;
-types[FLOAT_MAT2] = (gl: WebGL2RenderingContext) => gl.uniformMatrix2fv;
-types[FLOAT_MAT3] = (gl: WebGL2RenderingContext) => gl.uniformMatrix3fv;
-types[FLOAT_MAT4] = (gl: WebGL2RenderingContext) => gl.uniformMatrix4fv;
-
-types[SAMPLER_2D] = (gl: WebGL2RenderingContext) => {
-  return function(
-    location: WebGLUniformLocation,
-    texture: WebGLTexture,
-    unit: number
-  ) {
-    gl.uniform1i(location, unit);
-
-    gl.activeTexture(gl.TEXTURE0 + unit);
-
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-  };
-};
-
 function isWebGl(info: WebGLActiveInfo) {
   const name = info.name.toLocaleLowerCase();
   return name.startsWith("gl_") || name.startsWith("webgl_");
@@ -80,37 +57,6 @@ export interface Shader {
   uniforms: any;
 }
 
-/*
-    {
-      gl.activeTexture(gl.TEXTURE0);
-
-      gl.bindTexture(gl.TEXTURE_2D, texture);
-
-      gl.uniform1i(shaderProgram.uniforms.uSampler, 0);
-    }
-
-    {
-      gl.activeTexture(gl.TEXTURE1);
-
-      gl.bindTexture(gl.TEXTURE_2D, textureNormal);
-
-      gl.uniform1i(shaderProgram.uniforms.uSamplerB, 1);
-    }
-
-    gl.uniform1f(shaderProgram.uniforms.time, time);
-
-    gl.uniformMatrix4fv(
-      shaderProgram.uniforms.uProjectionMatrix,
-      false,
-      projectionMatrix
-    );
-    gl.uniformMatrix4fv(
-      shaderProgram.uniforms.uModelViewMatrix,
-      false,
-      modelViewMatrix
-    );
-    gl.uniform3fv(shaderProgram.uniforms.uLightPosition, light.position);
-*/
 export function updateUniforms(
   gl: WebGL2RenderingContext,
   shader: Shader,
@@ -130,6 +76,7 @@ export function updateUniforms(
     }
 
     const location = gl.getUniformLocation(shader.program, info.name);
+
     switch (info.type) {
       case FLOAT: {
         gl.uniform1f(location, value);
@@ -162,13 +109,6 @@ export function updateUniforms(
         break;
       }
     }
-
-    // const uniformSetter = types[info.type] as any;
-
-    // if (uniformSetter) {
-    //   const index = gl.getUniformLocation(shader.program, info.name);
-    //   uniformSetter(index, value);
-    // }
   }
 }
 

@@ -33,6 +33,7 @@ export function createInterleavedBuffer(
   const output: { [key: string]: { offset: number; components: number } } = {};
   const array = new Float32Array(size);
   let offset = 0;
+  let count = 0;
 
   for (const name in attributes) {
     const attribute = attributes[name];
@@ -55,21 +56,24 @@ export function createInterleavedBuffer(
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
 
-  const indexArray = new Uint16Array(indicies);
-
   let indexBuffer = undefined;
 
   if (indicies) {
+    const indexArray = new Uint16Array(indicies);
     indexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexArray, gl.STATIC_DRAW);
+
+    count = indicies.length / 3;
+  } else {
+    count = size / stride;
   }
 
   return {
     buffer,
     attributes: output,
     stride,
-    count: indicies.length / 3,
+    count,
     indices: indexBuffer
   };
 }

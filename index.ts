@@ -3,12 +3,14 @@ import * as shader from "./shader";
 import * as textures from "./texture";
 import * as geometry from "./geometry";
 
+import * as cube from "./cube.json";
+
 const camera = {
   position: vec3.create(),
   lookat: vec3.create()
 };
 
-camera.position.set([0, 0, 3]);
+camera.position.set([0, 0, 5]);
 camera.lookat.set([0, 0, 0]);
 
 const light = {
@@ -87,16 +89,22 @@ async function main() {
     {
       position: {
         components: 3,
-        data: [-0.5, 0.5, 0, 0.5, 0.5, 0, 0.5, -0.5, 0, -0.5, -0.5, 0]
+        data: cube.position
       },
       normal: {
         components: 3,
-        data: [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1]
+        data: cube.normal
       },
-      texcoord: { components: 2, data: [0, 0, 1, 0, 1, 1, 0, 1] },
-      tangent: { components: 3, data: [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0] }
+      texcoord: {
+        components: 2,
+        data: cube.texcoord
+      },
+      tangent: {
+        components: 3,
+        data: cube.tangent
+      }
     },
-    [0, 1, 2, 0, 2, 3]
+    cube.indices
   );
 
   geometry.bindBufferAndProgram(gl, shaderProgram, quad);
@@ -105,17 +113,10 @@ async function main() {
   const modelViewMatrix = mat4.create();
   mat4.lookAt(modelViewMatrix, camera.position, camera.lookat, [0, 1, 0]);
 
-  // shader.updateUniforms(gl, shaderProgram, {
-  //   uModelViewMatrix: modelViewMatrix
-  // });
-
-  // const buffers = initBuffers(gl);
   let time = 0.0;
 
   function render() {
     time += 0.01;
-
-    //drawScene(gl, shaderProgram, buffers, texture, textureNormal, (t += 0.01));
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clearDepth(1.0);
@@ -147,41 +148,6 @@ async function main() {
       uModelViewMatrix: modelViewMatrix,
       uLightPosition: light.position
     });
-    /*
-    (() => {
-
-      const n = gl.getProgramParameter(shaderProgram.program, gl.ACTIVE_UNIFORMS);
-      for (let i = 0; i < n; i++) {
-        const info = gl.getActiveUniform(shaderProgram.program, i);
-            
-        const value = attributes[info.name];
-        if (!value) {
-          continue;
-        }
-    
-        const uniformSetter = types[info.type] as any;
-    
-        if (uniformSetter) {
-          const index = gl.getUniformLocation(shaderProgram.program, info.name);
-          uniformSetter(index, value);
-        }
-      }
-    })()
-
-    gl.uniform1f(shaderProgram.uniforms.time, time);
-
-    gl.uniformMatrix4fv(
-      shaderProgram.uniforms.uProjectionMatrix,
-      false,
-      projectionMatrix
-    );
-    gl.uniformMatrix4fv(
-      shaderProgram.uniforms.uModelViewMatrix,
-      false,
-      modelViewMatrix
-    );
-    gl.uniform3fv(shaderProgram.uniforms.uLightPosition, light.position);
-    */
 
     geometry.bindBufferAndProgram(gl, shaderProgram, quad);
 
