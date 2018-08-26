@@ -117,6 +117,7 @@ export function updateUniforms(
   attributes: { [key: string]: any }
 ) {
   const n = gl.getProgramParameter(shader.program, gl.ACTIVE_UNIFORMS);
+  let unit = 0;
   for (let i = 0; i < n; i++) {
     const info = gl.getActiveUniform(shader.program, i);
     if (isWebGl(info)) {
@@ -148,6 +149,16 @@ export function updateUniforms(
       }
       case FLOAT_MAT4: {
         gl.uniformMatrix4fv(location, false, value);
+        break;
+      }
+      case SAMPLER_2D: {
+        gl.uniform1i(location, unit);
+
+        gl.activeTexture(gl.TEXTURE0 + unit);
+
+        gl.bindTexture(gl.TEXTURE_2D, value);
+
+        unit++;
         break;
       }
     }

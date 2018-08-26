@@ -140,8 +140,8 @@ async function main() {
     gl.useProgram(shaderProgram.program);
 
     shader.updateUniforms(gl, shaderProgram, {
-      uSampler: texture,
       uSamplerB: textureNormal,
+      uSampler: texture,
       time: time,
       uProjectionMatrix: projectionMatrix,
       uModelViewMatrix: modelViewMatrix,
