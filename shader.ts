@@ -80,13 +80,42 @@ export interface Shader {
   uniforms: any;
 }
 
+/*
+    {
+      gl.activeTexture(gl.TEXTURE0);
+
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+
+      gl.uniform1i(shaderProgram.uniforms.uSampler, 0);
+    }
+
+    {
+      gl.activeTexture(gl.TEXTURE1);
+
+      gl.bindTexture(gl.TEXTURE_2D, textureNormal);
+
+      gl.uniform1i(shaderProgram.uniforms.uSamplerB, 1);
+    }
+
+    gl.uniform1f(shaderProgram.uniforms.time, time);
+
+    gl.uniformMatrix4fv(
+      shaderProgram.uniforms.uProjectionMatrix,
+      false,
+      projectionMatrix
+    );
+    gl.uniformMatrix4fv(
+      shaderProgram.uniforms.uModelViewMatrix,
+      false,
+      modelViewMatrix
+    );
+    gl.uniform3fv(shaderProgram.uniforms.uLightPosition, light.position);
+*/
 export function updateUniforms(
   gl: WebGL2RenderingContext,
   shader: Shader,
   attributes: { [key: string]: any }
 ) {
-  gl.useProgram(shader.program);
-
   const n = gl.getProgramParameter(shader.program, gl.ACTIVE_UNIFORMS);
   for (let i = 0; i < n; i++) {
     const info = gl.getActiveUniform(shader.program, i);
@@ -99,12 +128,36 @@ export function updateUniforms(
       continue;
     }
 
-    const uniformSetter = types[info.type] as any;
-
-    if (uniformSetter) {
-      const index = gl.getUniformLocation(shader.program, info.name);
-      uniformSetter(index, value);
+    const location = gl.getUniformLocation(shader.program, info.name);
+    switch (info.type) {
+      case FLOAT: {
+        gl.uniform1f(location, value);
+        break;
+      }
+      case FLOAT_VEC2: {
+        gl.uniform2fv(location, value);
+        break;
+      }
+      case FLOAT_VEC3: {
+        gl.uniform3fv(location, value);
+        break;
+      }
+      case FLOAT_VEC4: {
+        gl.uniform4fv(location, value);
+        break;
+      }
+      case FLOAT_MAT4: {
+        gl.uniformMatrix4fv(location, false, value);
+        break;
+      }
     }
+
+    // const uniformSetter = types[info.type] as any;
+
+    // if (uniformSetter) {
+    //   const index = gl.getUniformLocation(shader.program, info.name);
+    //   uniformSetter(index, value);
+    // }
   }
 }
 

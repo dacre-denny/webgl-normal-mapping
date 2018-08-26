@@ -9,7 +9,7 @@ const camera = {
 };
 
 camera.position.set([0, 0, 3]);
-camera.position.set([0, 0, 0]);
+camera.lookat.set([0, 0, 0]);
 
 const light = {
   position: vec3.create()
@@ -137,7 +137,7 @@ async function main() {
     const modelRotation = mat4.create();
     mat4.fromZRotation(modelRotation, time);
 
-    geometry.bindBufferAndProgram(gl, shaderProgram, quad);
+    gl.useProgram(shaderProgram.program);
 
     shader.updateUniforms(gl, shaderProgram, {
       uSampler: texture,
@@ -147,24 +147,26 @@ async function main() {
       uModelViewMatrix: modelViewMatrix,
       uLightPosition: light.position
     });
-
-    gl.useProgram(shaderProgram.program);
     /*
-    {
-      gl.activeTexture(gl.TEXTURE0);
+    (() => {
 
-      gl.bindTexture(gl.TEXTURE_2D, texture);
-
-      gl.uniform1i(shaderProgram.uniforms.uSampler, 0);
-    }
-
-    {
-      gl.activeTexture(gl.TEXTURE1);
-
-      gl.bindTexture(gl.TEXTURE_2D, textureNormal);
-
-      gl.uniform1i(shaderProgram.uniforms.uSamplerB, 1);
-    }
+      const n = gl.getProgramParameter(shaderProgram.program, gl.ACTIVE_UNIFORMS);
+      for (let i = 0; i < n; i++) {
+        const info = gl.getActiveUniform(shaderProgram.program, i);
+            
+        const value = attributes[info.name];
+        if (!value) {
+          continue;
+        }
+    
+        const uniformSetter = types[info.type] as any;
+    
+        if (uniformSetter) {
+          const index = gl.getUniformLocation(shaderProgram.program, info.name);
+          uniformSetter(index, value);
+        }
+      }
+    })()
 
     gl.uniform1f(shaderProgram.uniforms.time, time);
 
@@ -179,7 +181,10 @@ async function main() {
       modelViewMatrix
     );
     gl.uniform3fv(shaderProgram.uniforms.uLightPosition, light.position);
-*/
+    */
+
+    geometry.bindBufferAndProgram(gl, shaderProgram, quad);
+
     geometry.drawBuffer(gl, quad);
 
     requestAnimationFrame(render);
