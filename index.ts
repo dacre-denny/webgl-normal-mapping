@@ -1,4 +1,4 @@
-import { mat4, vec3 } from "gl-matrix";
+import { mat4, mat2, vec3, vec2 } from "gl-matrix";
 import * as shader from "./shader";
 import * as textures from "./texture";
 import * as geometry from "./geometry";
@@ -51,6 +51,34 @@ document.addEventListener("mousemove", (event: MouseEvent) => {
     vec3.rotateY(light.position, light.position, [0, 0, 0], t);
   }
 });
+
+function computeTangents(
+  p0: vec3,
+  p1: vec3,
+  p2: vec3,
+  t0: vec2,
+  t1: vec2,
+  t2: vec2
+): { b: vec3; t: vec3 } {
+  const s = vec3.create();
+  const t = vec3.create();
+
+  vec3.sub(s, p1, p0);
+  vec3.sub(t, p2, p0);
+
+  const i = vec2.create();
+  const j = vec2.create();
+
+  vec2.sub(i, t1, t0);
+  vec2.sub(j, t2, t0);
+
+  const m = mat2.create();
+  const invm = mat2.create();
+  mat2.set(m, i[0], j[0], i[1], j[1]);
+  mat2.invert(invm, m);
+
+  return {};
+}
 
 async function main() {
   const canvas = document.querySelector("canvas");
