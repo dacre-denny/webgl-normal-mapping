@@ -52,32 +52,49 @@ document.addEventListener("mousemove", (event: MouseEvent) => {
   }
 });
 
-function computeTangents(
-  p0: vec3,
-  p1: vec3,
-  p2: vec3,
-  t0: vec2,
-  t1: vec2,
-  t2: vec2
-): { b: vec3; t: vec3 } {
-  const s = vec3.create();
+function computeTangent(
+  v1: vec3,
+  v2: vec3,
+  v3: vec3,
+  w1: vec2,
+  w2: vec2,
+  w3: vec2
+): vec3 {
+  const x1 = v2[0] - v1[0];
+  const x2 = v3[0] - v1[0];
+  const y1 = v2[1] - v1[1];
+  const y2 = v3[1] - v1[1];
+  const z1 = v2[2] - v1[2];
+  const z2 = v3[2] - v1[2];
+
+  const s1 = w2[0] - w1[0];
+  const s2 = w3[0] - w1[0];
+  const t1 = w2[1] - w1[1];
+  const t2 = w3[1] - w1[1];
+
+  const r = 1.0 / (s1 * t2 - s2 * t1);
+
   const t = vec3.create();
+  const s = vec3.create();
 
-  vec3.sub(s, p1, p0);
-  vec3.sub(t, p2, p0);
+  vec3.set(
+    t,
+    (s1 * x2 - s2 * x1) * r,
+    (s1 * y2 - s2 * y1) * r,
+    (s1 * z2 - s2 * z1) * r
+  );
 
-  const i = vec2.create();
-  const j = vec2.create();
+  vec3.set(
+    s,
+    (t2 * x1 - t1 * x2) * r,
+    (t2 * y1 - t1 * y2) * r,
+    (t2 * z1 - t1 * z2) * r
+  );
 
-  vec2.sub(i, t1, t0);
-  vec2.sub(j, t2, t0);
+  const tnorm = vec3.create();
+  vec3.normalize(tnorm, t);
 
-  const m = mat2.create();
-  const invm = mat2.create();
-  mat2.set(m, i[0], j[0], i[1], j[1]);
-  mat2.invert(invm, m);
-
-  return {};
+  return tnorm;
 }
 
 async function main() {
@@ -123,6 +140,51 @@ async function main() {
     },
     [0, 1, 2, 3, 4, 5]
   );
+
+  for (var i = 0; i < cube.indices.length; i += 3) {
+    const i0 = cube.indices[i + 0];
+    const i1 = cube.indices[i + 1];
+    const i2 = cube.indices[i + 2];
+
+    const pos = (idx: number) => {
+      const v = vec3.create();
+      vec3.set(
+        v,
+        cube.position[idx * 3 + 0],
+        cube.position[idx * 3 + 1],
+        cube.position[idx * 3 + 2]
+      );
+      return v;
+    };
+
+    const tex = (idx: number) => {
+      const v = vec2.create();
+      vec2.set(v, cube.texcoord[idx * 2 + 0], cube.texcoord[idx * 2 + 1]);
+      return v;
+    };
+
+    const v0 = pos(i0);
+    const v1 = pos(i1);
+    const v2 = pos(i2);
+
+    const w0 = tex(i0);
+    const w1 = tex(i1);
+    const w2 = tex(i2);
+
+    const tangent = computeTangent(v0, v1, v2, w0, w1, w2);
+
+    cube.tangent[i0 * 3 + 0] = tangent[0];
+    cube.tangent[i0 * 3 + 1] = tangent[1];
+    cube.tangent[i0 * 3 + 2] = tangent[2];
+
+    cube.tangent[i1 * 3 + 0] = tangent[0];
+    cube.tangent[i1 * 3 + 1] = tangent[1];
+    cube.tangent[i1 * 3 + 2] = tangent[2];
+
+    cube.tangent[i2 * 3 + 0] = tangent[0];
+    cube.tangent[i2 * 3 + 1] = tangent[1];
+    cube.tangent[i2 * 3 + 2] = tangent[2];
+  }
 
   const cubeGeometry = geometry.createInterleavedBuffer(
     gl,
