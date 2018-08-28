@@ -29,7 +29,7 @@ void main() {
   vec3 tangent = normalize(vTangent);
   vec3 cotangent = normalize(cross(tangent, normal));
 
-  mat3 tangentSpace = mat3( tangent, cotangent,normal);
+  mat3 tangentSpace = mat3(cotangent, tangent, normal);
 
   //vec3 texelNormal = (texture2D(uSamplerB, vTextureCoord).xyz - vec3(0.5, 0.5, 0.5)) * 2.0;
 
@@ -42,8 +42,9 @@ void main() {
   gl_FragColor.w = 1.0;
 
   gl_FragColor.xyz = vec3(diffuse, diffuse, diffuse);
-  // gl_FragColor.xyz = makeColor(tangent);
   // gl_FragColor.xyz = makeColor(cotangent);
   gl_FragColor.xyz = makeColor(normal);
+  gl_FragColor.xyz = makeColor(tangent);
+  gl_FragColor.xyz = makeColor(cotangent);
   // gl_FragColor.xyz = makeColor(vec3(0.0, 0.0, 1.0));
 }

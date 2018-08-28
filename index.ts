@@ -10,7 +10,7 @@ const camera = {
   lookat: vec3.create()
 };
 
-camera.position.set([1, -2, 5]);
+camera.position.set([1, 2, 5]);
 camera.lookat.set([0, 0, 0]);
 
 const light = {
