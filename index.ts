@@ -16,7 +16,7 @@ camera.lookat.set([0, 0, 0]);
 const light = {
   position: vec3.create()
 };
-light.position.set([1.5, 0, 0]);
+light.position.set([1.5, 1, 0]);
 /*
 document.addEventListener("keydown", event => {
   switch (event.keyCode) {

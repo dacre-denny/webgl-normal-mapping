@@ -14,7 +14,7 @@ varying vec4 vColor;
 varying vec3 vTangent; 
 varying vec3 vNormal; 
 varying vec2 vTextureCoord;
-varying vec4 vPosition;
+varying vec3 vPosition;
 
 void main() { 
 
@@ -22,7 +22,7 @@ void main() {
     vNormal = normal;
     vTangent = tangent;
     vTextureCoord = texcoord;
-    vPosition = position;
+    vPosition = position.xyz;
 
     gl_Position = uProjectionMatrix * uModelViewMatrix * position;
 }
