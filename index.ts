@@ -43,7 +43,7 @@ document.addEventListener("keydown", event => {
 
 */
 document.addEventListener("mousemove", (event: MouseEvent) => {
-  const t = (5 * event.movementX) / document.body.clientWidth;
+  const t = (15 * event.movementX) / document.body.clientWidth;
 
   if (event.buttons > 0) {
     vec3.rotateY(camera.position, camera.position, camera.lookat, t);
@@ -156,6 +156,40 @@ async function main() {
       color: {
         components: 3,
         data: [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1]
+      }
+    },
+    [0, 1, 2, 3, 4, 5]
+  );
+
+  const lightGeometry = geometry.createInterleavedBuffer(
+    gl,
+    {
+      position: {
+        components: 3,
+        data: [
+          -0.1,
+          0,
+          0,
+          0.1,
+          0,
+          0,
+          0,
+          -0.1,
+          0,
+          0,
+          0.1,
+          0,
+          0,
+          0,
+          -0.1,
+          0,
+          0,
+          0.1
+        ]
+      },
+      color: {
+        components: 3,
+        data: [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0]
       }
     },
     [0, 1, 2, 3, 4, 5]
@@ -279,18 +313,29 @@ async function main() {
     gl.useProgram(axisShader.program);
 
     shader.updateUniforms(gl, axisShader, {
-      uSamplerB: textureNormal,
-      uSampler: texture,
-      time: time,
       uProjectionMatrix: projectionMatrix,
-      uModelViewMatrix: modelViewMatrix,
-      uLightPosition: light.position
+      uModelViewMatrix: modelViewMatrix
     });
 
     geometry.bindBufferAndProgram(gl, axisShader, axisGeometry);
 
     geometry.drawBuffer(gl, axisGeometry, gl.LINES);
 
+    ///
+
+    const lightTranslation = mat4.create();
+    mat4.fromTranslation(lightTranslation, light.position);
+
+    mat4.multiply(modelViewMatrix, modelViewMatrix, lightTranslation);
+
+    shader.updateUniforms(gl, axisShader, {
+      uProjectionMatrix: projectionMatrix,
+      uModelViewMatrix: modelViewMatrix
+    });
+
+    geometry.bindBufferAndProgram(gl, axisShader, lightGeometry);
+
+    geometry.drawBuffer(gl, lightGeometry, gl.LINES);
     ///
 
     requestAnimationFrame(render);

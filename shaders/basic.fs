@@ -32,7 +32,7 @@ void main() {
 
   vec3 lightVecTs = tangentSpace * lightDirection;
 
-  float diffuse = max(0.11, dot(normal, lightVecTs));
+  float diffuse = clamp(dot(normal, lightVecTs), 0.0, 1.0);
   
   gl_FragColor = texture2D(uSampler, vTextureCoord) * vec4(diffuse,diffuse,diffuse,1.0);
   gl_FragColor = texture2D(uSamplerB, vTextureCoord); // * vec4(diffuse,diffuse,diffuse,1.0);
