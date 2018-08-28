@@ -10,7 +10,7 @@ const camera = {
   lookat: vec3.create()
 };
 
-camera.position.set([1, 1, 5]);
+camera.position.set([1, -2, 5]);
 camera.lookat.set([0, 0, 0]);
 
 const light = {
@@ -119,6 +119,7 @@ function computeTangent(
 
 async function main() {
   const canvas = document.querySelector("canvas");
+  canvas.addEventListener("contextmenu", event => event.preventDefault());
   const gl = canvas.getContext("webgl2") as WebGL2RenderingContext;
 
   if (gl === null) {
@@ -195,7 +196,7 @@ async function main() {
     [0, 1, 2, 3, 4, 5]
   );
 
-  cube.indices = [0, 1, 2, 0, 2, 3].map(x => x + 16);
+  // cube.indices = [0, 1, 2, 0, 2, 3].map(x => x + 16);
 
   for (var i = 0; i < cube.indices.length; i += 3) {
     const i0 = cube.indices[i + 0];

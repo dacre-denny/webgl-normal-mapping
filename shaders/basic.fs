@@ -17,18 +17,21 @@ uniform vec3 uLightPosition;
 vec3 makeColor(vec3 v) {
   return (v.xyz * 0.5 + vec3(0.5, 0.5, 0.5));
 }
+vec3 makeVector(vec3 v) {
+  return (v.xyz * 2.0 - vec3(1.0, 1.0, 1.0));
+}
 
 void main() {
   
-  vec3 lightDirection = normalize(vPosition.xyz - uLightPosition);
+  vec3 lightDirection = normalize(uLightPosition - vPosition.xyz);
 
   vec3 normal = normalize(vNormal);
   vec3 tangent = normalize(vTangent);
-  vec3 cotangent = normalize(cross(normal, tangent));
+  vec3 cotangent = normalize(cross(tangent, normal));
 
-  mat3 tangentSpace = mat3(normal, tangent, cotangent);
+  mat3 tangentSpace = mat3( tangent, cotangent,normal);
 
-  vec3 texelNormal = (texture2D(uSamplerB, vTextureCoord).xyz - vec3(0.5, 0.5, 0.5)) * 2.0;
+  //vec3 texelNormal = (texture2D(uSamplerB, vTextureCoord).xyz - vec3(0.5, 0.5, 0.5)) * 2.0;
 
   vec3 lightVecTs = tangentSpace * lightDirection;
 
@@ -37,9 +40,10 @@ void main() {
   gl_FragColor = texture2D(uSampler, vTextureCoord) * vec4(diffuse,diffuse,diffuse,1.0);
   gl_FragColor = texture2D(uSamplerB, vTextureCoord); // * vec4(diffuse,diffuse,diffuse,1.0);
   gl_FragColor.w = 1.0;
-  gl_FragColor.xyz = makeColor(normal);
-  gl_FragColor.xyz = makeColor(tangent);
 
   gl_FragColor.xyz = vec3(diffuse, diffuse, diffuse);
-  // gl_FragColor.xyz = vec3(0.5, 0.0, 0.5);
+  // gl_FragColor.xyz = makeColor(tangent);
+  // gl_FragColor.xyz = makeColor(cotangent);
+  gl_FragColor.xyz = makeColor(normal);
+  // gl_FragColor.xyz = makeColor(vec3(0.0, 0.0, 1.0));
 }
