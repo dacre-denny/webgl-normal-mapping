@@ -16,7 +16,7 @@ camera.lookat.set([0, 0, 0]);
 const light = {
   position: vec3.create()
 };
-light.position.set([1.5, 1, 0]);
+light.position.set([1, 0, 0]);
 /*
 document.addEventListener("keydown", event => {
   switch (event.keyCode) {
@@ -327,6 +327,7 @@ async function main() {
     const lightTranslation = mat4.create();
     mat4.fromTranslation(lightTranslation, light.position);
 
+    console.log("light.position", light.position);
     mat4.multiply(modelViewMatrix, modelViewMatrix, lightTranslation);
 
     shader.updateUniforms(gl, axisShader, {

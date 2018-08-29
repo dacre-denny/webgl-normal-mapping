@@ -63,5 +63,14 @@ void main() {
   gl_FragColor.xyz = makeColor(tangent);
   gl_FragColor.xyz = makeColor(cotangent);
   // gl_FragColor.xyz = makeColor(vec3(0.0, 0.0, 1.0));
+  if(vTextureCoord.x > 0.5) {
+
   gl_FragColor.xyz = vec3(diffuse, diffuse, diffuse);
+  gl_FragColor.xyz = texture2D(uSamplerB, vTextureCoord).xyz;
+  }
+  else {
+    
+  gl_FragColor.xyz = makeColor(lightDirection);
+
+  }
 }
