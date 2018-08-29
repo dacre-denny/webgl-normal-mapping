@@ -41,7 +41,7 @@ void main() {
   //vec3 texelVec = makeVector( texture2D(uSamplerB, vTextureCoord).xyz );
   // normal = normalize( texture2D(uSamplerB, vTextureCoord).xyz )
 
-  mat3 toModelSpace = mat3(tangent, cotangent, normal);
+  mat3 toModelSpace = mat3( tangent, cotangent,normal);
   mat3 toTangentSpace = transpose(toModelSpace);
 
   //vec3 lightVecTs = toTangentSpace * lightDirection;
@@ -57,15 +57,15 @@ void main() {
   float diffuse = max(dot(offset, lightDirection), 0.0);
   
   gl_FragColor.w = 1.0;
-
+/*
   // gl_FragColor.xyz = makeColor(cotangent);
   gl_FragColor.xyz = makeColor(normal);
   gl_FragColor.xyz = makeColor(tangent);
   gl_FragColor.xyz = makeColor(cotangent);
   // gl_FragColor.xyz = makeColor(vec3(0.0, 0.0, 1.0));
-  if(vTextureCoord.x > 0.5) {
+  
+  if(vTextureCoord.x < 0.5) {
 
-  gl_FragColor.xyz = vec3(diffuse, diffuse, diffuse);
   gl_FragColor.xyz = texture2D(uSamplerB, vTextureCoord).xyz;
   }
   else {
@@ -73,4 +73,6 @@ void main() {
   gl_FragColor.xyz = makeColor(lightDirection);
 
   }
+  */
+  gl_FragColor.xyz = vec3(diffuse, diffuse, diffuse);
 }

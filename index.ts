@@ -16,7 +16,7 @@ camera.lookat.set([0, 0, 0]);
 const light = {
   position: vec3.create()
 };
-light.position.set([1, 0, 0]);
+light.position.set([2, 2, 0]);
 /*
 document.addEventListener("keydown", event => {
   switch (event.keyCode) {
@@ -49,6 +49,8 @@ document.addEventListener("mousemove", (event: MouseEvent) => {
     vec3.rotateY(camera.position, camera.position, camera.lookat, t);
   } else {
     vec3.rotateY(light.position, light.position, [0, 0, 0], t);
+
+    light.position[1] = Math.sin(event.clientX * 0.03) * 3;
   }
 });
 
@@ -327,7 +329,6 @@ async function main() {
     const lightTranslation = mat4.create();
     mat4.fromTranslation(lightTranslation, light.position);
 
-    console.log("light.position", light.position);
     mat4.multiply(modelViewMatrix, modelViewMatrix, lightTranslation);
 
     shader.updateUniforms(gl, axisShader, {
