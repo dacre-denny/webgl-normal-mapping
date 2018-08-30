@@ -1,4 +1,6 @@
+import { vec2, vec3 } from "gl-matrix";
 import { Shader } from "./shader";
+// import data from "./data.json";
 
 interface Geometry {
   attributes: { [key: string]: { offset: number; components: number } };

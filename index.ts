@@ -16,7 +16,7 @@ camera.lookat.set([0, 0, 0]);
 const light = {
   position: vec3.create()
 };
-light.position.set([2, 2, 0]);
+light.position.set([2, 1, 0]);
 /*
 document.addEventListener("keydown", event => {
   switch (event.keyCode) {
@@ -62,35 +62,35 @@ function computeTangent(
   w2: vec2,
   w3: vec2
 ): vec3 {
-  const x1 = v2[0] - v1[0];
-  const x2 = v3[0] - v1[0];
-  const y1 = v2[1] - v1[1];
-  const y2 = v3[1] - v1[1];
-  const z1 = v2[2] - v1[2];
-  const z2 = v3[2] - v1[2];
+  const edge1 = vec3.create();
+  const edge2 = vec3.create();
 
-  const s1 = w2[0] - w1[0];
-  const s2 = w3[0] - w1[0];
-  const t1 = w2[1] - w1[1];
-  const t2 = w3[1] - w1[1];
+  vec3.sub(edge1, v2, v1);
+  vec3.sub(edge2, v3, v1);
 
-  const r = 1.0 / (s1 * t2 - s2 * t1);
+  const deltaUV1 = vec2.create();
+  const deltaUV2 = vec2.create();
+
+  vec2.sub(deltaUV1, w2, w1);
+  vec2.sub(deltaUV2, w3, w1);
+
+  const r = 1.0 / (deltaUV1[0] * deltaUV2[1] - deltaUV2[0] * deltaUV1[1]);
 
   const t = vec3.create();
   const s = vec3.create();
 
   vec3.set(
     t,
-    (s1 * x2 - s2 * x1) * r,
-    (s1 * y2 - s2 * y1) * r,
-    (s1 * z2 - s2 * z1) * r
+    (deltaUV2[1] * edge1[0] - deltaUV1[1] * edge2[0]) * r,
+    (deltaUV2[1] * edge1[1] - deltaUV1[1] * edge2[1]) * r,
+    (deltaUV2[1] * edge1[2] - deltaUV1[1] * edge2[2]) * r
   );
 
   vec3.set(
     s,
-    (t2 * x1 - t1 * x2) * r,
-    (t2 * y1 - t1 * y2) * r,
-    (t2 * z1 - t1 * z2) * r
+    (-deltaUV2[0] * edge1[0] + deltaUV1[0] * edge2[0]) * r,
+    (-deltaUV2[0] * edge1[1] + deltaUV1[0] * edge2[1]) * r,
+    (-deltaUV2[0] * edge1[2] + deltaUV1[0] * edge2[2]) * r
   );
 
   const tnorm = vec3.create();
@@ -101,19 +101,19 @@ function computeTangent(
   vec3.normalize(bnorm, s);
   vec3.cross(nnorm, tnorm, bnorm);
 
-  console.log(`
-  v1 ${v1}
-  v2 ${v2}
-  v3 ${v3}
-  --
-  w1 ${w1}
-  w2 ${w2}
-  w3 ${w3}
-  --
-  t ${tnorm}
-  b ${bnorm}
-  n ${nnorm}
-  `);
+  // console.log(`
+  // v1 ${v1}
+  // v2 ${v2}
+  // v3 ${v3}
+  // --
+  // w1 ${w1}
+  // w2 ${w2}
+  // w3 ${w3}
+  // --
+  // t ${tnorm}
+  // b ${bnorm}
+  // n ${nnorm}
+  // `);
 
   // vec3.set(tnorm, 0, 1, 0);
   return tnorm;
@@ -131,10 +131,13 @@ async function main() {
     return;
   }
 
-  const texture = await textures.loadTexture(gl, "./textures/metal-color.png");
+  const texture = await textures.loadTexture(
+    gl,
+    "./textures/EC_Stone_Wall_D.jpg"
+  );
   const textureNormal = await textures.loadTexture(
     gl,
-    "./textures/metal-normal.png"
+    "./textures/EC_Stone_Wall_Normal.jpg"
   );
 
   const cubeShader = await shader.loadProgram(
@@ -250,22 +253,22 @@ async function main() {
     {
       position: {
         components: 3,
-        data: cube.position
+        data: cube.position // [-1, -1, 1, -1, 1, 1, 1, 1, 1, 1, -1, 1]
       },
       normal: {
         components: 3,
-        data: cube.normal
+        data: cube.normal // [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1]
       },
       texcoord: {
         components: 2,
-        data: cube.texcoord
+        data: cube.texcoord // [0, 0, 0, 1, 1, 1, 1, 0]
       },
       tangent: {
         components: 3,
-        data: cube.tangent
+        data: cube.tangent // [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0]
       }
     },
-    cube.indices
+    cube.indices //[0, 1, 2, 0, 2, 3]
   );
 
   const modelViewMatrix = mat4.create();
@@ -308,6 +311,11 @@ async function main() {
       uLightPosition: light.position
     });
 
+    light.position[0] = Math.sin(time) * 2;
+    light.position[1] = Math.sin(time * 0.5) * 2;
+    light.position[2] = Math.cos(time) * 2;
+
+    console.log("light.position", light.position);
     geometry.bindBufferAndProgram(gl, cubeShader, cubeGeometry);
 
     geometry.drawBuffer(gl, cubeGeometry);
