@@ -48,9 +48,8 @@ document.addEventListener("mousemove", (event: MouseEvent) => {
   if (event.buttons > 0) {
     vec3.rotateY(camera.position, camera.position, camera.lookat, t);
   } else {
-    vec3.rotateY(light.position, light.position, [0, 0, 0], t);
-
-    light.position[1] = Math.sin(event.clientX * 0.03) * 3;
+    // vec3.rotateY(light.position, light.position, [0, 0, 0], t);
+    // light.position[1] = Math.sin(event.clientX * 0.03) * 3;
   }
 });
 
