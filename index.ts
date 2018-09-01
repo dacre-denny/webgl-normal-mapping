@@ -17,7 +17,7 @@ const light = {
   position: vec3.create(),
   color: vec3.create()
 };
-light.position.set([2, 1, 0]);
+light.position.set([2, 1, 2]);
 light.color.set([0.85, 0.95, 1]);
 /*
 document.addEventListener("keydown", event => {
@@ -295,7 +295,11 @@ async function main() {
     mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
 
     const modelRotation = mat4.create();
-    mat4.fromZRotation(modelRotation, time);
+    mat4.fromTranslation(modelRotation, [Math.sin(time) * 5, 0, 0]);
+
+    mat4.rotateZ(modelRotation, modelRotation, time);
+    ////mat4.fromZRotation(modelRotation, time);
+    //mat4.multiply(modelRotation, mat4.fromZRotation(mat4.create()) , time);
 
     const modelViewMatrix = mat4.create();
     mat4.lookAt(modelViewMatrix, camera.position, camera.lookat, [0, 1, 0]);
@@ -308,16 +312,16 @@ async function main() {
       uTextureColor: texture,
       uProjectionMatrix: projectionMatrix,
       uViewMatrix: modelViewMatrix,
+      uViewPosition: camera.position,
       uWorldMatrix: modelRotation,
       uLightPosition: light.position,
       uLightColor: light.color
     });
 
-    light.position[0] = Math.sin(time) * 2;
-    light.position[1] = Math.sin(time * 0.5) * 2;
-    light.position[2] = Math.cos(time) * 2;
+    // light.position[0] = Math.sin(time) * 2;
+    // light.position[1] = Math.sin(time * 0.5) * 2;
+    // light.position[2] = Math.cos(time) * 2;
 
-    console.log("light.position", light.position);
     geometry.bindBufferAndProgram(gl, cubeShader, cubeGeometry);
 
     geometry.drawBuffer(gl, cubeGeometry);
