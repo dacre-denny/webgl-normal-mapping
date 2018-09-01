@@ -7,15 +7,13 @@ attribute vec2 texcoord;
 attribute vec3 normal;
 attribute vec3 tangent;
 
-uniform mat4 uModelViewMatrix;
+uniform mat4 uWorldMatrix;
+uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
 uniform float time;
 uniform vec3 uLightPosition;
 
-varying vec4 vColor; 
-varying vec3 vTangent; 
-varying vec3 vBinormal; 
-varying vec3 vNormal; 
+varying vec4 vColor;  
 varying vec2 vTextureCoord;
 varying vec3 vPosition;
 
@@ -32,25 +30,20 @@ mat3 transpose(mat3 m) {
 void main() { 
 
     vec3 T = normalize(tangent);
-    vec3 N = normalize(normal);
+    vec3 N = normalize(normal);  
     
     T = normalize(T - dot(T, N) * N);
     
     vec3 B = cross(N, T);
-
     mat3 TBN = transpose(mat3(T,B,N));
     
-    tangentLightPosition = TBN * uLightPosition;
+    tangentLightPosition = TBN * transpose(mat3(uWorldMatrix))  * uLightPosition;
     tangentVertexPosition = TBN * position.xyz;
     tangentVertexNormal = TBN * normal;
-
-    vBinormal = B;
-
-    vColor = vec4(1.0,0.0,0.0,1.0);
-    vNormal = normal;
-    vTangent = tangent;
+ 
+    vColor = vec4(1.0,0.0,0.0,1.0); 
     vTextureCoord = texcoord;
     vPosition = position.xyz;
 
-    gl_Position = uProjectionMatrix * uModelViewMatrix * position;
+    gl_Position = uProjectionMatrix * uViewMatrix * uWorldMatrix * position;
 }

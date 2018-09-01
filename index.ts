@@ -292,11 +292,11 @@ async function main() {
     const projectionMatrix = mat4.create();
     mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
 
-    const modelViewMatrix = mat4.create();
-    mat4.lookAt(modelViewMatrix, camera.position, camera.lookat, [0, 1, 0]);
-
     const modelRotation = mat4.create();
     mat4.fromZRotation(modelRotation, time);
+
+    const modelViewMatrix = mat4.create();
+    mat4.lookAt(modelViewMatrix, camera.position, camera.lookat, [0, 1, 0]);
 
     /***/
     gl.useProgram(cubeShader.program);
@@ -306,7 +306,8 @@ async function main() {
       uSampler: texture,
       time: time,
       uProjectionMatrix: projectionMatrix,
-      uModelViewMatrix: modelViewMatrix,
+      uViewMatrix: modelViewMatrix,
+      uWorldMatrix: modelRotation,
       uLightPosition: light.position
     });
 

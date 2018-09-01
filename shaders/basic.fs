@@ -4,15 +4,12 @@ precision highp float;
 varying vec4 vColor;
 varying vec2 vTextureCoord;
 varying vec3 vPosition;
-varying vec3 vTangent;
-varying vec3 vBinormal; 
-varying vec3 vNormal;
 
 varying vec3 tangentLightPosition;
 varying vec3 tangentVertexPosition;
 varying vec3 tangentVertexNormal;
 
-uniform mat4 uModelViewMatrix;
+uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
 
 uniform sampler2D uSampler;
