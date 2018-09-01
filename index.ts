@@ -14,9 +14,11 @@ camera.position.set([1, 2, 5]);
 camera.lookat.set([0, 0, 0]);
 
 const light = {
-  position: vec3.create()
+  position: vec3.create(),
+  color: vec3.create()
 };
 light.position.set([2, 1, 0]);
+light.color.set([0.85, 0.95, 1]);
 /*
 document.addEventListener("keydown", event => {
   switch (event.keyCode) {
@@ -302,13 +304,13 @@ async function main() {
     gl.useProgram(cubeShader.program);
 
     shader.updateUniforms(gl, cubeShader, {
-      uSamplerB: textureNormal,
-      uSampler: texture,
-      time: time,
+      uTextureNormal: textureNormal,
+      uTextureColor: texture,
       uProjectionMatrix: projectionMatrix,
       uViewMatrix: modelViewMatrix,
       uWorldMatrix: modelRotation,
-      uLightPosition: light.position
+      uLightPosition: light.position,
+      uLightColor: light.color
     });
 
     light.position[0] = Math.sin(time) * 2;

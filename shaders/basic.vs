@@ -1,8 +1,7 @@
 
 precision highp float;
 
-attribute vec4 position;
-// attribute vec4 color;
+attribute vec4 position; 
 attribute vec2 texcoord;
 attribute vec3 normal;
 attribute vec3 tangent;
@@ -10,10 +9,8 @@ attribute vec3 tangent;
 uniform mat4 uWorldMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
-uniform float time;
 uniform vec3 uLightPosition;
-
-varying vec4 vColor;  
+ 
 varying vec2 vTextureCoord;
 varying vec3 vPosition;
 
@@ -37,11 +34,10 @@ void main() {
     vec3 B = cross(N, T);
     mat3 TBN = transpose(mat3(T,B,N));
     
-    tangentLightPosition = TBN * transpose(mat3(uWorldMatrix))  * uLightPosition;
+    tangentLightPosition = TBN * transpose(mat3(uWorldMatrix)) * uLightPosition;
     tangentVertexPosition = TBN * position.xyz;
     tangentVertexNormal = TBN * normal;
- 
-    vColor = vec4(1.0,0.0,0.0,1.0); 
+  
     vTextureCoord = texcoord;
     vPosition = position.xyz;
 
