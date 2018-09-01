@@ -318,9 +318,13 @@ async function main() {
       uLightColor: light.color
     });
 
-    // light.position[0] = Math.sin(time) * 2;
-    // light.position[1] = Math.sin(time * 0.5) * 2;
-    // light.position[2] = Math.cos(time) * 2;
+    light.position[0] = Math.sin(time) * 2;
+    light.position[1] = Math.sin(time * 0.5) * 2;
+    light.position[2] = Math.cos(time) * 2;
+
+    light.color[0] = 0.75 + 0.25 * (Math.sin(time) * 0.5 + 0.5);
+    light.color[1] = 0.75 + 0.25 * (Math.cos(time) * 0.5 + 0.5);
+    light.color[2] = 0.75 + 0.25 * (Math.cos(time + 1.54) * 0.5 + 0.5);
 
     geometry.bindBufferAndProgram(gl, cubeShader, cubeGeometry);
 
