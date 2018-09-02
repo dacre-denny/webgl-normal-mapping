@@ -117,11 +117,24 @@ export function updateUniforms(
 export async function loadProgram(
   gl: WebGL2RenderingContext,
   vsSource: string,
-  fsSource: string
+  fsSource: string,
+  defines: string[] = []
 ) {
-  const vertexShader = await loadShader(gl, gl.VERTEX_SHADER, vsSource);
-  const fragmentShader = await loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
-
+  const definitions = defines
+    .map(definition => `#define ${definition}`)
+    .join("\n");
+  const vertexShader = await loadShader(
+    gl,
+    gl.VERTEX_SHADER,
+    vsSource,
+    definitions
+  );
+  const fragmentShader = await loadShader(
+    gl,
+    gl.FRAGMENT_SHADER,
+    fsSource,
+    definitions
+  );
   // Create the shader program
 
   const program = gl.createProgram();
@@ -145,7 +158,8 @@ export async function loadProgram(
 async function loadShader(
   gl: WebGL2RenderingContext,
   type: number,
-  url: string
+  url: string,
+  definitions: string = ""
 ) {
   const result = await fetch(url);
   const source = await result.text();
@@ -154,7 +168,7 @@ async function loadShader(
 
   // Send the source to the shader object
 
-  gl.shaderSource(shader, source);
+  gl.shaderSource(shader, definitions + source);
 
   // Compile the shader program
 

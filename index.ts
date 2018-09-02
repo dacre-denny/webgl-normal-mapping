@@ -155,7 +155,8 @@ async function main() {
   const cubeShader = await shader.loadProgram(
     gl,
     "./shaders/basic.vs",
-    "./shaders/basic.fs"
+    "./shaders/basic.fs",
+    ["LIGHTS 2"]
   );
 
   const axisShader = await shader.loadProgram(
@@ -306,11 +307,11 @@ async function main() {
     mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
 
     const modelRotation = mat4.create();
-    //mat4.fromTranslation(modelRotation, [Math.sin(time) * 5, 0, 0]);
+    mat4.fromTranslation(modelRotation, [Math.sin(time) * 1, 0, 0]);
 
-    //mat4.rotateZ(modelRotation, modelRotation, time);
-    ////mat4.fromZRotation(modelRotation, time);
-    //mat4.multiply(modelRotation, mat4.fromZRotation(mat4.create()) , time);
+    mat4.rotateZ(modelRotation, modelRotation, time);
+    //mat4.fromZRotation(modelRotation, time);
+    // mat4.multiply(modelRotation, mat4.fromZRotation(mat4.create()), time);
 
     const modelViewMatrix = mat4.create();
     mat4.lookAt(modelViewMatrix, camera.position, camera.lookat, [0, 1, 0]);
