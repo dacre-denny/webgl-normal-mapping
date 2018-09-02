@@ -1,5 +1,11 @@
-
+#define LIGHTS 2
 precision highp float;
+
+struct Light {
+  vec3 color;
+  vec3 position;
+  float range;
+};
 
 attribute vec4 position; 
 attribute vec2 texcoord;
@@ -9,16 +15,16 @@ attribute vec3 tangent;
 uniform mat4 uWorldMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
-
-uniform vec3 uLightPosition;
+ 
 uniform vec3 uViewPosition;
+uniform Light lights[LIGHTS];
  
 varying vec2 vTextureCoord;
 varying vec3 vPosition;
 
-varying vec3 tangentLightPosition;
 varying vec3 tangentVertexPosition;
 varying vec3 tangentVertexNormal;
+varying vec3 tangentLightPositions[LIGHTS];
 
 varying vec3 tangentViewPosition;
 
@@ -81,7 +87,12 @@ void main() {
     vec3 B = cross(N, T);
     
     mat3 TBN = transpose(mat3(T,B,N));    
-    tangentLightPosition = TBN * vec3(normalInvMatrix * vec4(uLightPosition, 1.0));
+    // tangentLightPosition = TBN * vec3(normalInvMatrix * vec4(0.0,0.0,0.0, 1.0));
+
+    for(int i = 0; i < LIGHTS; i++) {
+        tangentLightPositions[i] = TBN * vec3(normalInvMatrix * vec4(lights[i].position, 1.0));
+    }
+
     tangentVertexPosition = TBN * position.xyz;
     tangentVertexNormal = TBN * normal;
     tangentViewPosition = TBN * vec3(normalInvMatrix * vec4(uViewPosition, 1.0));

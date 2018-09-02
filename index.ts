@@ -13,12 +13,23 @@ const camera = {
 camera.position.set([1, 2, 5]);
 camera.lookat.set([0, 0, 0]);
 
-const light = {
+const light0 = {
   position: vec3.create(),
-  color: vec3.create()
+  color: vec3.create(),
+  range: 1.0
 };
-light.position.set([2, 1, 2]);
-light.color.set([0.85, 0.95, 1]);
+
+const light1 = {
+  position: vec3.create(),
+  color: vec3.create(),
+  range: 1.0
+};
+
+light0.position.set([2, 1, 2]);
+light0.color.set([0.85, 0.95, 1]);
+
+light1.position.set([2, 1, 2]);
+light1.color.set([0.85, 0.95, 1]);
 /*
 document.addEventListener("keydown", event => {
   switch (event.keyCode) {
@@ -308,23 +319,30 @@ async function main() {
     gl.useProgram(cubeShader.program);
 
     shader.updateUniforms(gl, cubeShader, {
+      lights: [light0, light1],
       uTextureNormal: textureNormal,
       uTextureColor: texture,
       uProjectionMatrix: projectionMatrix,
       uViewMatrix: modelViewMatrix,
       uViewPosition: camera.position,
-      uWorldMatrix: modelRotation,
-      uLightPosition: light.position,
-      uLightColor: light.color
+      uWorldMatrix: modelRotation
     });
 
-    light.position[0] = Math.sin(time) * 2;
-    light.position[1] = Math.sin(time * 0.5) * 2;
-    light.position[2] = Math.cos(time) * 2;
+    light0.position[0] = Math.sin(time) * 2;
+    light0.position[1] = Math.sin(time * 0.5) * 2;
+    light0.position[2] = Math.cos(time) * 2;
 
-    light.color[0] = 0.75 + 0.25 * (Math.sin(time) * 0.5 + 0.5);
-    light.color[1] = 0.75 + 0.25 * (Math.cos(time) * 0.5 + 0.5);
-    light.color[2] = 0.75 + 0.25 * (Math.cos(time + 1.54) * 0.5 + 0.5);
+    light1.position[0] = Math.sin(0.5 + time) * 2;
+    light1.position[1] = Math.sin(0.5 + time * 0.5) * 2;
+    light1.position[2] = Math.cos(0.5 + time) * 2;
+
+    light0.color[0] = 0.0;
+    light0.color[1] = 0.0;
+    light0.color[2] = 1.0;
+
+    light1.color[0] = 1.0;
+    light1.color[1] = 0.0;
+    light1.color[2] = 0.0;
 
     geometry.bindBufferAndProgram(gl, cubeShader, cubeGeometry);
 
@@ -345,7 +363,7 @@ async function main() {
     ///
 
     const lightTranslation = mat4.create();
-    mat4.fromTranslation(lightTranslation, light.position);
+    mat4.fromTranslation(lightTranslation, light0.position);
 
     mat4.multiply(modelViewMatrix, modelViewMatrix, lightTranslation);
 

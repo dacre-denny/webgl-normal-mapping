@@ -1,4 +1,5 @@
 import { mat3, mat4, vec2, vec3, vec4 } from "gl-matrix";
+import * as _ from "lodash";
 
 const FLOAT = 0x1406;
 const FLOAT_VEC2 = 0x8b50;
@@ -64,13 +65,14 @@ export function updateUniforms(
 ) {
   const n = gl.getProgramParameter(shader.program, gl.ACTIVE_UNIFORMS);
   let unit = 0;
+
   for (let i = 0; i < n; i++) {
     const info = gl.getActiveUniform(shader.program, i);
     if (isWebGl(info)) {
       continue;
     }
 
-    const value = attributes[info.name];
+    const value = _.get(attributes, info.name); //[info.name];
     if (!value) {
       continue;
     }
