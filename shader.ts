@@ -167,8 +167,13 @@ async function loadShader(
   const shader = gl.createShader(type);
 
   // Send the source to the shader object
-
-  gl.shaderSource(shader, definitions + source);
+  gl.shaderSource(
+    shader,
+    `
+    ${definitions}
+    ${source}
+    `
+  );
 
   // Compile the shader program
 

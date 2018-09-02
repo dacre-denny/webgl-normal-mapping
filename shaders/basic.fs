@@ -1,6 +1,6 @@
-// #ifndef LIGHTS
-// #define LIGHTS 1
-// #endif
+#ifndef LIGHTS
+#define LIGHTS 1
+#endif
 precision highp float;
 
 struct Light {
