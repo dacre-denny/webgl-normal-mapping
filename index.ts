@@ -295,9 +295,9 @@ async function main() {
     mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
 
     const modelRotation = mat4.create();
-    mat4.fromTranslation(modelRotation, [Math.sin(time) * 5, 0, 0]);
+    //mat4.fromTranslation(modelRotation, [Math.sin(time) * 5, 0, 0]);
 
-    mat4.rotateZ(modelRotation, modelRotation, time);
+    //mat4.rotateZ(modelRotation, modelRotation, time);
     ////mat4.fromZRotation(modelRotation, time);
     //mat4.multiply(modelRotation, mat4.fromZRotation(mat4.create()) , time);
 
