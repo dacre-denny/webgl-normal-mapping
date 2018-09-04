@@ -81,73 +81,7 @@ async function main() {
 
   const lightGeometry = geometry.createLight(gl, 0.5);
 
-  for (var i = 0; i < cube.indices.length; i += 3) {
-    const i0 = cube.indices[i + 0];
-    const i1 = cube.indices[i + 1];
-    const i2 = cube.indices[i + 2];
-
-    const pos = (idx: number) => {
-      const v = vec3.create();
-      vec3.set(
-        v,
-        cube.position[idx * 3 + 0],
-        cube.position[idx * 3 + 1],
-        cube.position[idx * 3 + 2]
-      );
-      return v;
-    };
-
-    const tex = (idx: number) => {
-      const v = vec2.create();
-      vec2.set(v, cube.texcoord[idx * 2 + 0], cube.texcoord[idx * 2 + 1]);
-      return v;
-    };
-
-    const v0 = pos(i0);
-    const v1 = pos(i1);
-    const v2 = pos(i2);
-
-    const w0 = tex(i0);
-    const w1 = tex(i1);
-    const w2 = tex(i2);
-
-    const tangent = geometry.computeTangent(v0, v1, v2, w0, w1, w2);
-
-    cube.tangent[i0 * 3 + 0] = tangent[0];
-    cube.tangent[i0 * 3 + 1] = tangent[1];
-    cube.tangent[i0 * 3 + 2] = tangent[2];
-
-    cube.tangent[i1 * 3 + 0] = tangent[0];
-    cube.tangent[i1 * 3 + 1] = tangent[1];
-    cube.tangent[i1 * 3 + 2] = tangent[2];
-
-    cube.tangent[i2 * 3 + 0] = tangent[0];
-    cube.tangent[i2 * 3 + 1] = tangent[1];
-    cube.tangent[i2 * 3 + 2] = tangent[2];
-  }
-
-  const objectGeometry = geometry.createInterleavedBuffer(
-    gl,
-    {
-      position: {
-        components: 3,
-        data: cube.position
-      },
-      normal: {
-        components: 3,
-        data: cube.normal
-      },
-      texcoord: {
-        components: 2,
-        data: cube.texcoord
-      },
-      tangent: {
-        components: 3,
-        data: cube.tangent
-      }
-    },
-    cube.indices
-  );
+  const objectGeometry = geometry.loadGeometry(gl, cube);
 
   function updateClock() {
     const clockNow = Date.now() / 1000.0;
