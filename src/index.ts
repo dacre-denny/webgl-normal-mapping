@@ -37,6 +37,13 @@ window.addEventListener("resize", () => {
   applyWindowSize();
 });
 
+document.addEventListener("mousewheel", (event: MouseWheelEvent) => {
+  const vector = camera.getForward();
+  vec3.scale(vector, vector, event.wheelDelta * 0.005);
+  vec3.add(vector, vector, camera.getPosition());
+  camera.setPosition(vector[0], vector[1], vector[2]);
+});
+
 document.addEventListener("mousemove", (event: MouseEvent) => {
   const dx = event.movementX / document.body.clientWidth;
   const position = vec3.rotateY(
