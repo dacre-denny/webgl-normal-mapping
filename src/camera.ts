@@ -3,8 +3,8 @@ import * as helpers from "./helpers";
 
 export default class Camera {
   private constructor() {}
-  private viewMatrix = mat4.create();
-  private projMatrix = mat4.create();
+  private viewMatrix: mat4;
+  private projMatrix: mat4;
   private position = vec3.create();
   private lookAt = vec3.create();
   private aspect = 1.69;
@@ -107,9 +107,8 @@ export default class Camera {
 
   public getProjection(): mat4 {
     if (!this.projMatrix) {
-      this.projMatrix = mat4.create();
-      mat4.perspective(
-        this.projMatrix,
+      this.projMatrix = mat4.perspective(
+        mat4.create(),
         this.fov,
         this.aspect,
         this.near,
@@ -122,8 +121,11 @@ export default class Camera {
 
   public getView(): mat4 {
     if (!this.viewMatrix) {
-      this.viewMatrix = mat4.create();
-      mat4.lookAt(this.viewMatrix, this.position, this.lookAt, [0, 1, 0]);
+      this.viewMatrix = mat4.lookAt(mat4.create(), this.position, this.lookAt, [
+        0,
+        1,
+        0
+      ]);
     }
 
     return this.viewMatrix;

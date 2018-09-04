@@ -43,7 +43,7 @@ vec3 computeLighting(vec3 viewDirection, vec3 texelNormal) {
     vec3 halfVec = normalize(lightDirection + viewDirection);
     vec3 specular = vec3(min(pow(max(dot(halfVec, texelNormal), 0.0), 32.0), 1.0)) * attenuation;
     
-    color += lights[i].color * (diffuse + specular);
+    color += (lights[i].color * diffuse) + vec3(specular);
   }
 
   return color;
