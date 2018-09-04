@@ -4,8 +4,10 @@ import * as textures from "./texture";
 import * as geometry from "./geometry";
 import camera from "./camera";
 
-const camerax = camera.Create();
+let clockLast = Date.now();
+let clockDelta = 0;
 
+const camerax = camera.Create();
 camerax.setPosition(1, 2, 5);
 camerax.setDirection(0, 0, 0);
 
@@ -111,7 +113,7 @@ async function main() {
     {
       position: {
         components: 3,
-        data: [0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 5]
+        data: [0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2]
       },
       color: {
         components: 3,
@@ -149,7 +151,7 @@ async function main() {
       },
       color: {
         components: 3,
-        data: [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0]
+        data: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
       }
     },
     [0, 1, 2, 3, 4, 5]
@@ -226,61 +228,22 @@ async function main() {
   const modelViewMatrix = mat4.create();
   mat4.lookAt(modelViewMatrix, cameraOld.position, cameraOld.lookat, [0, 1, 0]);
 
-  let time = 0.0;
-
-  function renderLights(projectionMatrix: mat4) {
-    shader.updateUniforms(gl, simpleShader, {
-      uProjectionMatrix: projectionMatrix,
-      uViewMatrix: modelViewMatrix
-    });
-
-    const lightTranslation = mat4.create();
-
-    for (const light of lights) {
-      mat4.fromTranslation(lightTranslation, light.position);
-
-      shader.updateUniforms(gl, simpleShader, {
-        uWorldMatrix: lightTranslation
-      });
-
-      geometry.bindBufferAndProgram(gl, simpleShader, lightGeometry);
-
-      geometry.drawBuffer(gl, lightGeometry, gl.LINES);
-    }
+  function updateClock() {
+    const clockNow = Date.now() / 1000.0;
+    clockDelta = clockNow - clockLast;
+    clockLast = clockNow;
   }
 
-  function render() {
-    time += 0.01;
+  function renderObject(projectionMatrix: mat4) {
+    const rotationMatrix = mat4.create();
+    mat4.fromZRotation(rotationMatrix, clockLast);
 
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    gl.clearDepth(1.0);
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
+    const translationMatrix = mat4.create();
+    mat4.fromTranslation(translationMatrix, [Math.sin(clockLast), 0, 0]);
 
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    const worldMatrix = mat4.create();
+    mat4.multiply(worldMatrix, translationMatrix, rotationMatrix);
 
-    const fieldOfView = (70 * Math.PI) / 180; // in radians
-    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-    const zNear = 0.1;
-    const zFar = 100.0;
-    const projectionMatrix = mat4.create();
-    mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
-
-    const modelRotation = mat4.create();
-    mat4.fromTranslation(modelRotation, [Math.sin(time) * 1, 0, 0]);
-
-    mat4.rotateZ(modelRotation, modelRotation, time);
-    //mat4.fromZRotation(modelRotation, time);
-    // mat4.multiply(modelRotation, mat4.fromZRotation(mat4.create()), time);
-
-    const modelViewMatrix = mat4.create();
-    mat4.lookAt(modelViewMatrix, cameraOld.position, cameraOld.lookat, [
-      0,
-      1,
-      0
-    ]);
-
-    /***/
     gl.useProgram(cubeShader.program);
 
     shader.updateUniforms(gl, cubeShader, {
@@ -290,16 +253,28 @@ async function main() {
       uProjectionMatrix: projectionMatrix,
       uViewMatrix: modelViewMatrix,
       uViewPosition: cameraOld.position,
-      uWorldMatrix: modelRotation
+      uWorldMatrix: worldMatrix
     });
 
-    lights[0].position[0] = Math.sin(time) * 2;
-    lights[0].position[1] = Math.sin(time * 0.5) * 2;
-    lights[0].position[2] = Math.cos(time) * 2;
+    geometry.bindBufferAndProgram(gl, cubeShader, cubeGeometry);
 
-    lights[1].position[0] = Math.sin(0.5 + time) * 2;
-    lights[1].position[1] = Math.sin(0.5 + time * 0.5) * 2;
-    lights[1].position[2] = Math.cos(0.5 + time) * 2;
+    geometry.drawBuffer(gl, cubeGeometry);
+  }
+
+  function renderLights(projectionMatrix: mat4) {
+    vec3.set(
+      lights[0].position,
+      Math.sin(clockLast) * 2,
+      Math.sin(clockLast * 0.5) * 2,
+      Math.cos(clockLast) * 2
+    );
+
+    vec3.set(
+      lights[1].position,
+      Math.sin(Math.PI + clockLast) * 2,
+      Math.sin(Math.PI + clockLast * 0.5) * 2,
+      Math.cos(Math.PI + clockLast) * 2
+    );
 
     lights[0].color[0] = 0.0;
     lights[0].color[1] = 0.0;
@@ -309,10 +284,27 @@ async function main() {
     lights[1].color[1] = 0.0;
     lights[1].color[2] = 0.0;
 
-    geometry.bindBufferAndProgram(gl, cubeShader, cubeGeometry);
+    gl.useProgram(simpleShader.program);
 
-    geometry.drawBuffer(gl, cubeGeometry);
-    ///
+    shader.updateUniforms(gl, simpleShader, {
+      uProjectionMatrix: projectionMatrix,
+      uViewMatrix: modelViewMatrix
+    });
+
+    for (const light of lights) {
+      const lightTranslation = mat4.create();
+      mat4.fromTranslation(lightTranslation, light.position);
+
+      shader.updateUniforms(gl, simpleShader, {
+        uWorldMatrix: lightTranslation
+      });
+
+      geometry.bindBufferAndProgram(gl, simpleShader, lightGeometry);
+      geometry.drawBuffer(gl, lightGeometry, gl.LINES);
+    }
+  }
+
+  function renderAxis(projectionMatrix: mat4) {
     const identity = mat4.create();
     mat4.identity(identity);
 
@@ -327,10 +319,37 @@ async function main() {
     geometry.bindBufferAndProgram(gl, simpleShader, axisGeometry);
 
     geometry.drawBuffer(gl, axisGeometry, gl.LINES);
+  }
 
-    ///
+  function render() {
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearDepth(1.0);
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    const fieldOfView = (70 * Math.PI) / 180; // in radians
+    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+    const zNear = 0.1;
+    const zFar = 100.0;
+    const projectionMatrix = mat4.create();
+    mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
+
+    const modelViewMatrix = mat4.create();
+    mat4.lookAt(modelViewMatrix, cameraOld.position, cameraOld.lookat, [
+      0,
+      1,
+      0
+    ]);
+
+    renderObject(projectionMatrix);
+
     renderLights(projectionMatrix);
-    ///
+
+    renderAxis(projectionMatrix);
+
+    updateClock();
 
     requestAnimationFrame(render);
   }
