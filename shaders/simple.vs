@@ -9,10 +9,6 @@ uniform mat4 uProjectionMatrix;
 uniform float time;
 
 varying vec4 vColor; 
-varying vec3 vTangent; 
-varying vec3 vNormal; 
-varying vec2 vTextureCoord;
-varying vec4 vPosition;
 
 void main() { 
 
