@@ -1,4 +1,4 @@
-import { mat4, mat2, vec3, vec2 } from "gl-matrix";
+import { mat4, vec3 } from "gl-matrix";
 import * as helpers from "./helpers";
 
 export default class Camera {
@@ -16,11 +16,6 @@ export default class Camera {
     return new Camera();
   }
 
-  /**
-    const fieldOfView = (70 * Math.PI) / 180; // in radians
-    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-    const zNear = 0.1;
-    const zFar = 100.0; */
   public setFOV(fov: number) {
     this.fov = helpers.clamp(
       fov,

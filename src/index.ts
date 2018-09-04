@@ -2,23 +2,14 @@ import { mat4, mat2, vec3, vec2 } from "gl-matrix";
 import * as shader from "./shader";
 import * as textures from "./texture";
 import * as geometry from "./geometry";
-import camera from "./camera";
+import Camera from "./camera";
+import cube from "./cube";
 
 let clockLast = Date.now();
 
-const camerax = camera.Create();
-camerax.setPosition(1, 2, 5);
-camerax.setLookAt(0, 0, 0);
-
-import cube from "./cube";
-
-const cameraOld = {
-  position: vec3.create(),
-  lookat: vec3.create()
-};
-
-cameraOld.position.set([1, 2, 5]);
-cameraOld.lookat.set([0, 0, 0]);
+const camera = Camera.Create();
+camera.setPosition(1, 2, 5);
+camera.setLookAt(0, 0, 0);
 
 const lights = [
   {
@@ -28,61 +19,28 @@ const lights = [
   },
   {
     position: vec3.fromValues(2, 1, 2),
-    color: vec3.fromValues(0.85, 0.95, 1),
+    color: vec3.fromValues(0.35, 0.95, 1),
     range: 1.0
   }
 ];
 
 function applyWindowSize() {
-  camerax.setAspectRatio(
-    document.body.clientWidth / document.body.clientHeight
-  );
+  camera.setAspectRatio(document.body.clientWidth / document.body.clientHeight);
 }
 
 window.addEventListener("resize", () => {
   applyWindowSize();
 });
 
-/*
-document.addEventListener("keydown", event => {
-  switch (event.keyCode) {
-    case 87: {
-      const v = [0, 0, 0];
-
-      vec3.subtract(v, camera.lookat, camera.position);
-      vec3.scale(v, v, 0.1);
-      vec3.add(camera.position, camera.position, v);
-
-      break;
-    }
-    case 83: {
-      const v = [0, 0, 0];
-
-      vec3.subtract(v, camera.lookat, camera.position);
-      vec3.scale(v, v, -0.1);
-      vec3.add(camera.position, camera.position, v);
-
-      break;
-    }
-  }
-});
-
-*/
 document.addEventListener("mousemove", (event: MouseEvent) => {
-  const t = (15 * event.movementX) / document.body.clientWidth;
-
-  if (event.buttons > 0) {
-    const pos = vec3.rotateY(
-      vec3.create(),
-      camerax.getPosition(),
-      camerax.getLookAt(),
-      t
-    );
-    camerax.setPosition(pos[0], pos[1], pos[2]);
-  } else {
-    // vec3.rotateY(light.position, light.position, [0, 0, 0], t);
-    // light.position[1] = Math.sin(event.clientX * 0.03) * 3;
-  }
+  const dx = event.movementX / document.body.clientWidth;
+  const position = vec3.rotateY(
+    vec3.create(),
+    camera.getPosition(),
+    camera.getLookAt(),
+    dx * 30
+  );
+  camera.setPosition(position[0], position[1], position[2]);
 });
 
 async function main() {
@@ -262,9 +220,9 @@ async function main() {
       lights: lights,
       uTextureNormal: textureNormal,
       uTextureColor: textureColor,
-      uProjectionMatrix: camerax.getProjection(),
-      uViewMatrix: camerax.getView(),
-      uViewPosition: cameraOld.position,
+      uProjectionMatrix: camera.getProjection(),
+      uViewMatrix: camera.getView(),
+      uViewPosition: camera.getPosition(),
       uWorldMatrix: worldMatrix
     });
 
@@ -288,19 +246,11 @@ async function main() {
       Math.cos(Math.PI + clockLast) * 2
     );
 
-    lights[0].color[0] = 0.0;
-    lights[0].color[1] = 0.0;
-    lights[0].color[2] = 1.0;
-
-    lights[1].color[0] = 1.0;
-    lights[1].color[1] = 0.0;
-    lights[1].color[2] = 0.0;
-
     gl.useProgram(wireframeShader.program);
 
     shader.updateUniforms(gl, wireframeShader, {
-      uProjectionMatrix: camerax.getProjection(),
-      uViewMatrix: camerax.getView()
+      uProjectionMatrix: camera.getProjection(),
+      uViewMatrix: camera.getView()
     });
 
     for (const light of lights) {
@@ -320,8 +270,8 @@ async function main() {
     gl.useProgram(wireframeShader.program);
 
     shader.updateUniforms(gl, wireframeShader, {
-      uProjectionMatrix: camerax.getProjection(),
-      uViewMatrix: camerax.getView(),
+      uProjectionMatrix: camera.getProjection(),
+      uViewMatrix: camera.getView(),
       uWorldMatrix: mat4.create()
     });
 
@@ -337,15 +287,6 @@ async function main() {
     gl.depthFunc(gl.LEQUAL);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    const pos = vec3.set(
-      vec3.create(),
-      Math.sin(clockLast) * 5,
-      0.5,
-      Math.cos(clockLast) * 5
-    );
-    //camerax.setPosition(pos[0], pos[1], pos[2]);
-    //camerax.setLookAt(0, 0, 0);
 
     renderObject();
 
