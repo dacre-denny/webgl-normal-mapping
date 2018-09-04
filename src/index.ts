@@ -77,54 +77,9 @@ async function main() {
     "./shaders/simple.fs"
   );
 
-  const axisGeometry = geometry.createInterleavedBuffer(
-    gl,
-    {
-      position: {
-        components: 3,
-        data: [0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2]
-      },
-      color: {
-        components: 3,
-        data: [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1]
-      }
-    },
-    [0, 1, 2, 3, 4, 5]
-  );
+  const axisGeometry = geometry.createAxis(gl);
 
-  const lightGeometry = geometry.createInterleavedBuffer(
-    gl,
-    {
-      position: {
-        components: 3,
-        data: [
-          -0.1,
-          0,
-          0,
-          0.1,
-          0,
-          0,
-          0,
-          -0.1,
-          0,
-          0,
-          0.1,
-          0,
-          0,
-          0,
-          -0.1,
-          0,
-          0,
-          0.1
-        ]
-      },
-      color: {
-        components: 3,
-        data: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-      }
-    },
-    [0, 1, 2, 3, 4, 5]
-  );
+  const lightGeometry = geometry.createLight(gl, 0.5);
 
   for (var i = 0; i < cube.indices.length; i += 3) {
     const i0 = cube.indices[i + 0];
@@ -203,8 +158,8 @@ async function main() {
     const rotationMatrix = mat4.fromZRotation(mat4.create(), clockLast);
 
     const translationMatrix = mat4.fromTranslation(mat4.create(), [
-      Math.sin(clockLast),
       0,
+      Math.sin(clockLast),
       0
     ]);
 

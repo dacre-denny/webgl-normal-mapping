@@ -170,3 +170,39 @@ export function computeTangent(
 
   return tnorm;
 }
+
+export function createAxis(gl: WebGL2RenderingContext, radius: number = 5) {
+  return createInterleavedBuffer(
+    gl,
+    {
+      position: {
+        components: 3,
+        data: [0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2]
+      },
+      color: {
+        components: 3,
+        data: [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1]
+      }
+    },
+    [0, 1, 2, 3, 4, 5]
+  );
+}
+
+export function createLight(gl: WebGL2RenderingContext, radius: number = 1) {
+  return createInterleavedBuffer(
+    gl,
+    {
+      position: {
+        components: 3,
+        data: [-1, 0, 0, 1, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, -1, 0, 0, 1].map(
+          v => v * radius * 0.5
+        )
+      },
+      color: {
+        components: 3,
+        data: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+      }
+    },
+    [0, 1, 2, 3, 4, 5]
+  );
+}
