@@ -15,12 +15,17 @@ const lights = [
   {
     position: vec3.fromValues(2, 1, 2),
     color: vec3.fromValues(0.85, 0.95, 1),
-    range: 1.0
+    range: 0.25
   },
   {
     position: vec3.fromValues(2, 1, 2),
     color: vec3.fromValues(0.35, 0.95, 1),
     range: 1.0
+  },
+  {
+    position: vec3.fromValues(2, 1, 2),
+    color: vec3.fromValues(0.85, 0.45, 0.4),
+    range: 0.5
   }
 ];
 
@@ -68,7 +73,7 @@ async function main() {
     gl,
     "./shaders/normal.vs",
     "./shaders/normal.fs",
-    ["LIGHTS 2"]
+    ["LIGHTS " + lights.length]
   );
 
   const wireframeShader = await shader.loadProgram(
@@ -133,6 +138,13 @@ async function main() {
       Math.sin(Math.PI + clockLast) * 2,
       Math.sin(Math.PI + clockLast * 0.5) * 2,
       Math.cos(Math.PI + clockLast) * 2
+    );
+
+    vec3.set(
+      lights[2].position,
+      Math.sin(0.5 * clockLast * 0.5) * 2,
+      Math.cos(0.5 * clockLast) * 2,
+      Math.sin(0.5 * clockLast) * 2
     );
 
     gl.useProgram(wireframeShader.program);

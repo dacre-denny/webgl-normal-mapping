@@ -36,7 +36,7 @@ vec3 computeLighting(vec3 viewDirection, vec3 texelNormal) {
     vec3 lightDirection = normalize(lightVec);
     
     float clip = max(dot(vec3(0.0,0.0,1.0), lightDirection), 0.0);
-    float attenuation = clip * 1.0 / pow(length(lightVec), 2.0);
+    float attenuation = clip * lights[i].range / pow(length(lightVec), 2.0);
     
     vec3 diffuse = vec3(max(dot(texelNormal, lightDirection), 0.0)) * attenuation;
 
