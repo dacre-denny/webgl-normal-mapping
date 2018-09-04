@@ -2,32 +2,40 @@ import { mat4, mat2, vec3, vec2 } from "gl-matrix";
 import * as shader from "./shader";
 import * as textures from "./texture";
 import * as geometry from "./geometry";
-import Camera from "./camera";
+import camera from "./camera";
 
-const camera = new Camera();
+const camerax = camera.Create();
+
+camerax.setPosition(1, 2, 5);
+camerax.setDirection(0, 0, 0);
 
 import cube from "./cube";
 
-camera.setPosition(1, 2, 5);
-camera.setLookAt(0, 0, 0);
-
-const light0 = {
+const cameraOld = {
   position: vec3.create(),
-  color: vec3.create(),
-  range: 1.0
+  lookat: vec3.create()
 };
 
-const light1 = {
-  position: vec3.create(),
-  color: vec3.create(),
-  range: 1.0
-};
+cameraOld.position.set([1, 2, 5]);
+cameraOld.lookat.set([0, 0, 0]);
 
-light0.position.set([2, 1, 2]);
-light0.color.set([0.85, 0.95, 1]);
+const lights = [
+  {
+    position: vec3.create(),
+    color: vec3.create(),
+    range: 1.0
+  },
+  {
+    position: vec3.create(),
+    color: vec3.create(),
+    range: 1.0
+  }
+];
 
-light1.position.set([2, 1, 2]);
-light1.color.set([0.85, 0.95, 1]);
+lights[0].position.set([2, 1, 2]);
+lights[0].color.set([0.85, 0.95, 1]);
+lights[1].position.set([2, 1, 2]);
+lights[1].color.set([0.85, 0.95, 1]);
 /*
 document.addEventListener("keydown", event => {
   switch (event.keyCode) {
@@ -57,10 +65,7 @@ document.addEventListener("mousemove", (event: MouseEvent) => {
   const t = (15 * event.movementX) / document.body.clientWidth;
 
   if (event.buttons > 0) {
-    const position = vec3.create();
-    vec3.copy(position, camera.getPosition());
-    vec3.rotateY(position, position, camera.getLookAt(), t);
-    camera.setPosition(position[0], position[1], position[2]);
+    vec3.rotateY(cameraOld.position, cameraOld.position, cameraOld.lookat, t);
   } else {
     // vec3.rotateY(light.position, light.position, [0, 0, 0], t);
     // light.position[1] = Math.sin(event.clientX * 0.03) * 3;
@@ -218,22 +223,30 @@ async function main() {
     cube.indices
   );
 
+  const modelViewMatrix = mat4.create();
+  mat4.lookAt(modelViewMatrix, cameraOld.position, cameraOld.lookat, [0, 1, 0]);
+
   let time = 0.0;
 
-  function renderLights() {
-    const lightTranslation = mat4.create();
-    mat4.fromTranslation(lightTranslation, light0.position);
-
-    //mat4.multiply(modelViewMatrix, modelViewMatrix, lightTranslation);
-
+  function renderLights(projectionMatrix: mat4) {
     shader.updateUniforms(gl, simpleShader, {
-      uProjectionMatrix: camera.getProjection(),
-      uModelViewMatrix: camera.getView()
+      uProjectionMatrix: projectionMatrix,
+      uViewMatrix: modelViewMatrix
     });
 
-    geometry.bindBufferAndProgram(gl, simpleShader, lightGeometry);
+    const lightTranslation = mat4.create();
 
-    geometry.drawBuffer(gl, lightGeometry, gl.LINES);
+    for (const light of lights) {
+      mat4.fromTranslation(lightTranslation, light.position);
+
+      shader.updateUniforms(gl, simpleShader, {
+        uWorldMatrix: lightTranslation
+      });
+
+      geometry.bindBufferAndProgram(gl, simpleShader, lightGeometry);
+
+      geometry.drawBuffer(gl, lightGeometry, gl.LINES);
+    }
   }
 
   function render() {
@@ -246,6 +259,13 @@ async function main() {
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    const fieldOfView = (70 * Math.PI) / 180; // in radians
+    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+    const zNear = 0.1;
+    const zFar = 100.0;
+    const projectionMatrix = mat4.create();
+    mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
+
     const modelRotation = mat4.create();
     mat4.fromTranslation(modelRotation, [Math.sin(time) * 1, 0, 0]);
 
@@ -253,45 +273,55 @@ async function main() {
     //mat4.fromZRotation(modelRotation, time);
     // mat4.multiply(modelRotation, mat4.fromZRotation(mat4.create()), time);
 
+    const modelViewMatrix = mat4.create();
+    mat4.lookAt(modelViewMatrix, cameraOld.position, cameraOld.lookat, [
+      0,
+      1,
+      0
+    ]);
+
     /***/
     gl.useProgram(cubeShader.program);
 
     shader.updateUniforms(gl, cubeShader, {
-      lights: [light0, light1],
+      lights: lights,
       uTextureNormal: textureNormal,
       uTextureColor: textureColor,
-      uProjectionMatrix: camera.getProjection(),
-      uViewMatrix: camera.getView(),
-      uViewPosition: camera.getPosition(),
+      uProjectionMatrix: projectionMatrix,
+      uViewMatrix: modelViewMatrix,
+      uViewPosition: cameraOld.position,
       uWorldMatrix: modelRotation
     });
 
-    light0.position[0] = Math.sin(time) * 2;
-    light0.position[1] = Math.sin(time * 0.5) * 2;
-    light0.position[2] = Math.cos(time) * 2;
+    lights[0].position[0] = Math.sin(time) * 2;
+    lights[0].position[1] = Math.sin(time * 0.5) * 2;
+    lights[0].position[2] = Math.cos(time) * 2;
 
-    light1.position[0] = Math.sin(0.5 + time) * 2;
-    light1.position[1] = Math.sin(0.5 + time * 0.5) * 2;
-    light1.position[2] = Math.cos(0.5 + time) * 2;
+    lights[1].position[0] = Math.sin(0.5 + time) * 2;
+    lights[1].position[1] = Math.sin(0.5 + time * 0.5) * 2;
+    lights[1].position[2] = Math.cos(0.5 + time) * 2;
 
-    light0.color[0] = 0.0;
-    light0.color[1] = 0.0;
-    light0.color[2] = 1.0;
+    lights[0].color[0] = 0.0;
+    lights[0].color[1] = 0.0;
+    lights[0].color[2] = 1.0;
 
-    light1.color[0] = 1.0;
-    light1.color[1] = 0.0;
-    light1.color[2] = 0.0;
+    lights[1].color[0] = 1.0;
+    lights[1].color[1] = 0.0;
+    lights[1].color[2] = 0.0;
 
     geometry.bindBufferAndProgram(gl, cubeShader, cubeGeometry);
 
     geometry.drawBuffer(gl, cubeGeometry);
     ///
+    const identity = mat4.create();
+    mat4.identity(identity);
 
     gl.useProgram(simpleShader.program);
 
     shader.updateUniforms(gl, simpleShader, {
-      uProjectionMatrix: camera.getProjection(),
-      uModelViewMatrix: camera.getView()
+      uProjectionMatrix: projectionMatrix,
+      uViewMatrix: modelViewMatrix,
+      uWorldMatrix: identity
     });
 
     geometry.bindBufferAndProgram(gl, simpleShader, axisGeometry);
@@ -299,7 +329,7 @@ async function main() {
     geometry.drawBuffer(gl, axisGeometry, gl.LINES);
 
     ///
-    renderLights();
+    renderLights(projectionMatrix);
     ///
 
     requestAnimationFrame(render);

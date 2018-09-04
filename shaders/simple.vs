@@ -1,10 +1,7 @@
 precision highp float;
 
 attribute vec4 position;
-attribute vec4 color;
-attribute vec2 texcoord;
-attribute vec3 normal;
-attribute vec3 tangent;
+attribute vec4 color; 
 
 uniform mat4 uWorldMatrix;
 uniform mat4 uViewMatrix;
@@ -19,11 +16,7 @@ varying vec4 vPosition;
 
 void main() { 
 
-    vColor = color;
-    vNormal = normal;
-    vTangent = tangent;
-    vTextureCoord = texcoord;
-    vPosition = position;
+    vColor = color; 
 
     gl_Position = uProjectionMatrix * uViewMatrix * uWorldMatrix * position;
 }

@@ -2,6 +2,7 @@ import { mat4, mat2, vec3, vec2 } from "gl-matrix";
 import * as helpers from "./helpers";
 
 export default class Camera {
+  private constructor() {}
   private viewMatrix = mat4.create();
   private projMatrix = mat4.create();
   private position = vec3.create();
@@ -10,6 +11,11 @@ export default class Camera {
   private fov = (70 * Math.PI) / 180;
   private near = 0.1;
   private far = 100.0;
+
+  public static Create() {
+    return new Camera();
+  }
+
   /**
     const fieldOfView = (70 * Math.PI) / 180; // in radians
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
