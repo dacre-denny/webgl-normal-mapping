@@ -113,21 +113,6 @@ function computeTangent(
   vec3.normalize(bnorm, s);
   vec3.cross(nnorm, tnorm, bnorm);
 
-  // console.log(`
-  // v1 ${v1}
-  // v2 ${v2}
-  // v3 ${v3}
-  // --
-  // w1 ${w1}
-  // w2 ${w2}
-  // w3 ${w3}
-  // --
-  // t ${tnorm}
-  // b ${bnorm}
-  // n ${nnorm}
-  // `);
-
-  // vec3.set(tnorm, 0, 1, 0);
   return tnorm;
 }
 
@@ -214,8 +199,6 @@ async function main() {
     [0, 1, 2, 3, 4, 5]
   );
 
-  // cube.indices = [0, 1, 2, 0, 2, 3].map(x => x + 16);
-
   for (var i = 0; i < cube.indices.length; i += 3) {
     const i0 = cube.indices[i + 0];
     const i1 = cube.indices[i + 1];
@@ -266,22 +249,22 @@ async function main() {
     {
       position: {
         components: 3,
-        data: cube.position // [-1, -1, 1, -1, 1, 1, 1, 1, 1, 1, -1, 1]
+        data: cube.position
       },
       normal: {
         components: 3,
-        data: cube.normal // [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1]
+        data: cube.normal
       },
       texcoord: {
         components: 2,
-        data: cube.texcoord // [0, 0, 0, 1, 1, 1, 1, 0]
+        data: cube.texcoord
       },
       tangent: {
         components: 3,
-        data: cube.tangent // [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0]
+        data: cube.tangent
       }
     },
-    cube.indices //[0, 1, 2, 0, 2, 3]
+    cube.indices
   );
 
   const modelViewMatrix = mat4.create();
