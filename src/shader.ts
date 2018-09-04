@@ -1,4 +1,3 @@
-import { mat3, mat4, vec2, vec3, vec4 } from "gl-matrix";
 import * as _ from "lodash";
 
 const FLOAT = 0x1406;
@@ -135,7 +134,6 @@ export async function loadProgram(
     fsSource,
     definitions
   );
-  // Create the shader program
 
   const program = gl.createProgram();
   gl.attachShader(program, vertexShader);
@@ -166,7 +164,6 @@ async function loadShader(
 
   const shader = gl.createShader(type);
 
-  // Send the source to the shader object
   gl.shaderSource(
     shader,
     `
@@ -175,11 +172,7 @@ async function loadShader(
     `
   );
 
-  // Compile the shader program
-
   gl.compileShader(shader);
-
-  // See if it compiled successfully
 
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
     console.error(
