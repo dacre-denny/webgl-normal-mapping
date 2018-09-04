@@ -6,7 +6,8 @@ attribute vec2 texcoord;
 attribute vec3 normal;
 attribute vec3 tangent;
 
-uniform mat4 uModelViewMatrix;
+uniform mat4 uWorldMatrix;
+uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
 uniform float time;
 
@@ -24,5 +25,5 @@ void main() {
     vTextureCoord = texcoord;
     vPosition = position;
 
-    gl_Position = uProjectionMatrix * uModelViewMatrix * position;
+    gl_Position = uProjectionMatrix * uViewMatrix * uWorldMatrix * position;
 }

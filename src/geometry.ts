@@ -1,6 +1,5 @@
 import { vec2, vec3 } from "gl-matrix";
 import { Shader } from "./shader";
-// import data from "./data.json";
 
 interface Geometry {
   attributes: { [key: string]: { offset: number; components: number } };
@@ -120,4 +119,54 @@ export function drawBuffer(
   } else {
     gl.drawArrays(mode, 0, geometry.count);
   }
+}
+
+export function computeTangent(
+  v1: vec3,
+  v2: vec3,
+  v3: vec3,
+  w1: vec2,
+  w2: vec2,
+  w3: vec2
+): vec3 {
+  const edge1 = vec3.create();
+  const edge2 = vec3.create();
+
+  vec3.sub(edge1, v2, v1);
+  vec3.sub(edge2, v3, v1);
+
+  const deltaUV1 = vec2.create();
+  const deltaUV2 = vec2.create();
+
+  vec2.sub(deltaUV1, w2, w1);
+  vec2.sub(deltaUV2, w3, w1);
+
+  const r = 1.0 / (deltaUV1[0] * deltaUV2[1] - deltaUV2[0] * deltaUV1[1]);
+
+  const t = vec3.create();
+  const s = vec3.create();
+
+  vec3.set(
+    t,
+    (deltaUV2[1] * edge1[0] - deltaUV1[1] * edge2[0]) * r,
+    (deltaUV2[1] * edge1[1] - deltaUV1[1] * edge2[1]) * r,
+    (deltaUV2[1] * edge1[2] - deltaUV1[1] * edge2[2]) * r
+  );
+
+  vec3.set(
+    s,
+    (-deltaUV2[0] * edge1[0] + deltaUV1[0] * edge2[0]) * r,
+    (-deltaUV2[0] * edge1[1] + deltaUV1[0] * edge2[1]) * r,
+    (-deltaUV2[0] * edge1[2] + deltaUV1[0] * edge2[2]) * r
+  );
+
+  const tnorm = vec3.create();
+  const bnorm = vec3.create();
+  const nnorm = vec3.create();
+
+  vec3.normalize(tnorm, t);
+  vec3.normalize(bnorm, s);
+  vec3.cross(nnorm, tnorm, bnorm);
+
+  return tnorm;
 }

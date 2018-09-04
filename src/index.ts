@@ -2,16 +2,14 @@ import { mat4, mat2, vec3, vec2 } from "gl-matrix";
 import * as shader from "./shader";
 import * as textures from "./texture";
 import * as geometry from "./geometry";
+import Camera from "./camera";
+
+const camera = new Camera();
 
 import cube from "./cube";
 
-const camera = {
-  position: vec3.create(),
-  lookat: vec3.create()
-};
-
-camera.position.set([1, 2, 5]);
-camera.lookat.set([0, 0, 0]);
+camera.setPosition(1, 2, 5);
+camera.setLookAt(0, 0, 0);
 
 const light0 = {
   position: vec3.create(),
@@ -59,62 +57,15 @@ document.addEventListener("mousemove", (event: MouseEvent) => {
   const t = (15 * event.movementX) / document.body.clientWidth;
 
   if (event.buttons > 0) {
-    vec3.rotateY(camera.position, camera.position, camera.lookat, t);
+    const position = vec3.create();
+    vec3.copy(position, camera.getPosition());
+    vec3.rotateY(position, position, camera.getLookAt(), t);
+    camera.setPosition(position[0], position[1], position[2]);
   } else {
     // vec3.rotateY(light.position, light.position, [0, 0, 0], t);
     // light.position[1] = Math.sin(event.clientX * 0.03) * 3;
   }
 });
-
-function computeTangent(
-  v1: vec3,
-  v2: vec3,
-  v3: vec3,
-  w1: vec2,
-  w2: vec2,
-  w3: vec2
-): vec3 {
-  const edge1 = vec3.create();
-  const edge2 = vec3.create();
-
-  vec3.sub(edge1, v2, v1);
-  vec3.sub(edge2, v3, v1);
-
-  const deltaUV1 = vec2.create();
-  const deltaUV2 = vec2.create();
-
-  vec2.sub(deltaUV1, w2, w1);
-  vec2.sub(deltaUV2, w3, w1);
-
-  const r = 1.0 / (deltaUV1[0] * deltaUV2[1] - deltaUV2[0] * deltaUV1[1]);
-
-  const t = vec3.create();
-  const s = vec3.create();
-
-  vec3.set(
-    t,
-    (deltaUV2[1] * edge1[0] - deltaUV1[1] * edge2[0]) * r,
-    (deltaUV2[1] * edge1[1] - deltaUV1[1] * edge2[1]) * r,
-    (deltaUV2[1] * edge1[2] - deltaUV1[1] * edge2[2]) * r
-  );
-
-  vec3.set(
-    s,
-    (-deltaUV2[0] * edge1[0] + deltaUV1[0] * edge2[0]) * r,
-    (-deltaUV2[0] * edge1[1] + deltaUV1[0] * edge2[1]) * r,
-    (-deltaUV2[0] * edge1[2] + deltaUV1[0] * edge2[2]) * r
-  );
-
-  const tnorm = vec3.create();
-  const bnorm = vec3.create();
-  const nnorm = vec3.create();
-
-  vec3.normalize(tnorm, t);
-  vec3.normalize(bnorm, s);
-  vec3.cross(nnorm, tnorm, bnorm);
-
-  return tnorm;
-}
 
 async function main() {
   const canvas = document.querySelector("canvas");
@@ -128,7 +79,7 @@ async function main() {
     return;
   }
 
-  const texture = await textures.loadTexture(
+  const textureColor = await textures.loadTexture(
     gl,
     "./textures/EC_Stone_Wall_D.jpg"
   );
@@ -144,10 +95,10 @@ async function main() {
     ["LIGHTS 2"]
   );
 
-  const axisShader = await shader.loadProgram(
+  const simpleShader = await shader.loadProgram(
     gl,
-    "./shaders/axis.vs",
-    "./shaders/axis.fs"
+    "./shaders/simple.vs",
+    "./shaders/simple.fs"
   );
 
   const axisGeometry = geometry.createInterleavedBuffer(
@@ -229,7 +180,7 @@ async function main() {
     const w1 = tex(i1);
     const w2 = tex(i2);
 
-    const tangent = computeTangent(v0, v1, v2, w0, w1, w2);
+    const tangent = geometry.computeTangent(v0, v1, v2, w0, w1, w2);
 
     cube.tangent[i0 * 3 + 0] = tangent[0];
     cube.tangent[i0 * 3 + 1] = tangent[1];
@@ -267,10 +218,23 @@ async function main() {
     cube.indices
   );
 
-  const modelViewMatrix = mat4.create();
-  mat4.lookAt(modelViewMatrix, camera.position, camera.lookat, [0, 1, 0]);
-
   let time = 0.0;
+
+  function renderLights() {
+    const lightTranslation = mat4.create();
+    mat4.fromTranslation(lightTranslation, light0.position);
+
+    //mat4.multiply(modelViewMatrix, modelViewMatrix, lightTranslation);
+
+    shader.updateUniforms(gl, simpleShader, {
+      uProjectionMatrix: camera.getProjection(),
+      uModelViewMatrix: camera.getView()
+    });
+
+    geometry.bindBufferAndProgram(gl, simpleShader, lightGeometry);
+
+    geometry.drawBuffer(gl, lightGeometry, gl.LINES);
+  }
 
   function render() {
     time += 0.01;
@@ -282,13 +246,6 @@ async function main() {
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    const fieldOfView = (45 * Math.PI) / 180; // in radians
-    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-    const zNear = 0.1;
-    const zFar = 100.0;
-    const projectionMatrix = mat4.create();
-    mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
-
     const modelRotation = mat4.create();
     mat4.fromTranslation(modelRotation, [Math.sin(time) * 1, 0, 0]);
 
@@ -296,19 +253,16 @@ async function main() {
     //mat4.fromZRotation(modelRotation, time);
     // mat4.multiply(modelRotation, mat4.fromZRotation(mat4.create()), time);
 
-    const modelViewMatrix = mat4.create();
-    mat4.lookAt(modelViewMatrix, camera.position, camera.lookat, [0, 1, 0]);
-
     /***/
     gl.useProgram(cubeShader.program);
 
     shader.updateUniforms(gl, cubeShader, {
       lights: [light0, light1],
       uTextureNormal: textureNormal,
-      uTextureColor: texture,
-      uProjectionMatrix: projectionMatrix,
-      uViewMatrix: modelViewMatrix,
-      uViewPosition: camera.position,
+      uTextureColor: textureColor,
+      uProjectionMatrix: camera.getProjection(),
+      uViewMatrix: camera.getView(),
+      uViewPosition: camera.getPosition(),
       uWorldMatrix: modelRotation
     });
 
@@ -333,32 +287,19 @@ async function main() {
     geometry.drawBuffer(gl, cubeGeometry);
     ///
 
-    gl.useProgram(axisShader.program);
+    gl.useProgram(simpleShader.program);
 
-    shader.updateUniforms(gl, axisShader, {
-      uProjectionMatrix: projectionMatrix,
-      uModelViewMatrix: modelViewMatrix
+    shader.updateUniforms(gl, simpleShader, {
+      uProjectionMatrix: camera.getProjection(),
+      uModelViewMatrix: camera.getView()
     });
 
-    geometry.bindBufferAndProgram(gl, axisShader, axisGeometry);
+    geometry.bindBufferAndProgram(gl, simpleShader, axisGeometry);
 
     geometry.drawBuffer(gl, axisGeometry, gl.LINES);
 
     ///
-
-    const lightTranslation = mat4.create();
-    mat4.fromTranslation(lightTranslation, light0.position);
-
-    mat4.multiply(modelViewMatrix, modelViewMatrix, lightTranslation);
-
-    shader.updateUniforms(gl, axisShader, {
-      uProjectionMatrix: projectionMatrix,
-      uModelViewMatrix: modelViewMatrix
-    });
-
-    geometry.bindBufferAndProgram(gl, axisShader, lightGeometry);
-
-    geometry.drawBuffer(gl, lightGeometry, gl.LINES);
+    renderLights();
     ///
 
     requestAnimationFrame(render);
