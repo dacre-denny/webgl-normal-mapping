@@ -11,6 +11,7 @@ const camera = Camera.Create();
 camera.setPosition(1, 2, 5);
 camera.setLookAt(0, 0, 0);
 
+const ambient = vec3.fromValues(0.1, 0.1, 0.1);
 const lights = [
   {
     position: vec3.fromValues(2, 1, 2),
@@ -124,7 +125,8 @@ async function main() {
       uProjectionMatrix: camera.getProjection(),
       uViewMatrix: camera.getView(),
       uViewPosition: camera.getPosition(),
-      uWorldMatrix: worldMatrix
+      uWorldMatrix: worldMatrix,
+      ambient: ambient
     });
 
     geometry.bindBufferAndProgram(gl, normalShader, objectGeometry);
@@ -189,7 +191,7 @@ async function main() {
   }
 
   function render() {
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearColor(ambient[0], ambient[1], ambient[2], 1.0);
     gl.clearDepth(1.0);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);

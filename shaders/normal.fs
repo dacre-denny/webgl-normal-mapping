@@ -16,6 +16,7 @@ uniform sampler2D uTextureColor;
 uniform sampler2D uTextureNormal;
 
 uniform Light lights[LIGHTS];
+uniform vec3 ambient;
  
 varying vec2 vTextureCoord;
 varying vec3 vPosition;
@@ -56,8 +57,6 @@ void main() {
   vec3 texelNormal = normalize(texture2D(uTextureNormal, vTextureCoord).xyz * 2.0 - 1.0);
   vec3 texelColor = texture2D(uTextureColor, vTextureCoord).xyz;
   
-  vec3 ambient = vec3(0.1);
-
   vec3 lighting = computeLighting(viewDirection, texelNormal);
   vec3 L = texelColor * (lighting + ambient);
   gl_FragColor = vec4(L, 1.0);

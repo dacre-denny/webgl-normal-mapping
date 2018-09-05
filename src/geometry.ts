@@ -181,7 +181,9 @@ export function createAxis(gl: WebGL2RenderingContext, radius: number = 5) {
       },
       color: {
         components: 3,
-        data: [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1]
+        data: [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1].map(
+          v => v * 0.5 + 0.25
+        )
       }
     },
     [0, 1, 2, 3, 4, 5]
