@@ -73,13 +73,6 @@ const lights = [
   }
 ];
 
-function applyWindowSize() {
-  camera.setAspectRatio(document.body.clientWidth / document.body.clientHeight);
-}
-
-window.addEventListener("resize", () => {
-  applyWindowSize();
-});
 
 
 let axisGeometry: any
@@ -150,6 +143,10 @@ function renderAxis() {
   geometry.drawBuffer(gl, axisGeometry, gl.LINES);
 }
 
+function applyWindowSize() {
+  camera.setAspectRatio(document.body.clientWidth / document.body.clientHeight);
+}
+
 export async function create(canvas: HTMLCanvasElement) {
 
   gl = canvas.getContext("webgl") as WebGLRenderingContext;
@@ -176,6 +173,12 @@ export async function create(canvas: HTMLCanvasElement) {
     );
     camera.setPosition(position[0], position[1], position[2]);
   });
+
+  window.addEventListener("resize", () => {
+    applyWindowSize();
+  });
+
+  applyWindowSize()
 
   textureColor = await textures.loadTexture(
     gl,
@@ -264,4 +267,16 @@ export function render() {
   renderAxis();
 
   updateClock();
+}
+
+export function setNormalDepth(depth: number) {
+
+}
+
+export function setAnimationSpeed(speed: number) {
+
+}
+
+export function setLightCount(count: number) {
+
 }

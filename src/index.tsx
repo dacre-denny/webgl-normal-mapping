@@ -1,31 +1,36 @@
 import "./scss/index.scss";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { mat4, vec3 } from "gl-matrix";
-import * as shader from "./shader";
-import * as textures from "./texture";
-import * as geometry from "./geometry";
-import Camera from "./camera";
-import cube from "./cube";
 import * as Demo from "./demo";
+import Loading from "./components/loading";
 import Switch from "./components/switch";
 import Slider from "./components/slider";
-import { element } from "prop-types";
+import Alert from "./components/alert";
+
+interface State {
+  error?: Error,
+  loading: boolean,
+  normalDepth: number,
+  animationSpeed: number,
+  lightCount: number
+}
 
 class Container extends React.Component {
 
-  gl: WebGLRenderingContext
-
-  constructor(props: any) {
-    super(props)
-
+  state: State = {
+    error: undefined,
+    loading: false,
+    normalDepth: 0.5,
+    animationSpeed: 1.0,
+    lightCount: 3
   }
 
-  private async onInit(canvas: HTMLCanvasElement) {
+  canvas: React.RefObject<HTMLCanvasElement>
 
-    await Demo.create(canvas)
+  constructor(props: any) {
+    super(props);
 
-    this.onRenderFrame()
+    this.canvas = React.createRef<HTMLCanvasElement>();
   }
 
   private onRenderFrame() {
@@ -33,16 +38,30 @@ class Container extends React.Component {
     requestAnimationFrame(() => this.onRenderFrame())
   }
 
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
+  async componentDidMount() {
 
+    this.setState({ loading: true })
 
+    await Demo.create(this.canvas.current)
+
+    this.onRenderFrame()
+
+    this.setState({ loading: false })
   }
 
-  componentDidMount() {
+  componentWillUnmount() {
 
+    Demo.release()
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+
+    this.setState({ error })
   }
 
   render() {
+
+    const { error, loading } = this.state
 
     return <div>
       <div className="panel">
@@ -50,7 +69,9 @@ class Container extends React.Component {
         <Switch label="Animation" />
         <Slider label="Light" min={1} max={2} />
       </div>
-      <canvas ref={element => this.onInit(element)} width="1920" height="1080"></canvas>
+      {loading && <Loading />}
+      {error && <Alert error={error} />}
+      <canvas ref={this.canvas} width="1920" height="1080"></canvas>
     </div>
   }
 }
