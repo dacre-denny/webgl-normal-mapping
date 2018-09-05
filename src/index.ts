@@ -59,7 +59,7 @@ document.addEventListener("mousemove", (event: MouseEvent) => {
 async function main() {
   const canvas = document.querySelector("canvas");
   canvas.addEventListener("contextmenu", event => event.preventDefault());
-  const gl = canvas.getContext("webgl2") as WebGL2RenderingContext;
+  const gl = canvas.getContext("webgl") as WebGLRenderingContext;
 
   if (gl === null) {
     console.error(

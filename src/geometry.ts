@@ -25,7 +25,7 @@ function getAttributesInfo(attributes: {
 }
 
 export function createInterleavedBuffer(
-  gl: WebGL2RenderingContext,
+  gl: WebGLRenderingContext,
   attributes: { [key: string]: { data: number[]; components: number } },
   indicies: number[] | undefined = undefined
 ): Geometry {
@@ -171,7 +171,7 @@ export function computeTangent(
   return tnorm;
 }
 
-export function createAxis(gl: WebGL2RenderingContext, radius: number = 5) {
+export function createAxis(gl: WebGLRenderingContext, radius: number = 5) {
   return createInterleavedBuffer(
     gl,
     {
@@ -190,7 +190,7 @@ export function createAxis(gl: WebGL2RenderingContext, radius: number = 5) {
   );
 }
 
-export function createLight(gl: WebGL2RenderingContext, radius: number = 1) {
+export function createLight(gl: WebGLRenderingContext, radius: number = 1) {
   return createInterleavedBuffer(
     gl,
     {
@@ -210,7 +210,7 @@ export function createLight(gl: WebGL2RenderingContext, radius: number = 1) {
 }
 
 export function loadGeometry(
-  gl: WebGL2RenderingContext,
+  gl: WebGLRenderingContext,
   cube: {
     indices: number[];
     position: number[];

@@ -58,7 +58,7 @@ export interface Shader {
 }
 
 export function updateUniforms(
-  gl: WebGL2RenderingContext,
+  gl: WebGLRenderingContext,
   shader: Shader,
   attributes: { [key: string]: any }
 ) {
@@ -114,7 +114,7 @@ export function updateUniforms(
 }
 
 export async function loadProgram(
-  gl: WebGL2RenderingContext,
+  gl: WebGLRenderingContext,
   vsSource: string,
   fsSource: string,
   defines: string[] = []
@@ -154,7 +154,7 @@ export async function loadProgram(
 }
 
 async function loadShader(
-  gl: WebGL2RenderingContext,
+  gl: WebGLRenderingContext,
   type: number,
   url: string,
   definitions: string = ""
