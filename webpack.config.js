@@ -4,7 +4,7 @@ var webpack = require('webpack');
 
 module.exports = {
   entry: {
-    app: './src/index.ts'
+    app: './src/index.tsx'
   },
   devtool: 'inline-source-map',
   output: {
@@ -16,6 +16,9 @@ module.exports = {
   },
   plugins: [
     new CopyWebpackPlugin([{
+        from: './index.html',
+        to: './[name].[ext]'
+      }, {
         from: './shaders/**.*',
         to: './shaders/[name].[ext]'
       },
@@ -29,10 +32,22 @@ module.exports = {
   ],
   module: {
     rules: [{
-      test: /\.tsx?$/,
-      use: 'ts-loader',
-      exclude: /node_modules/
-    }]
+        test: /\.scss$/,
+        use: [
+          "style-loader",
+          "css-loader",
+          "sass-loader"
+        ]
+      }, {
+        test: /\.tsx?$/,
+        loader: "awesome-typescript-loader"
+      },
+      {
+        enforce: "pre",
+        test: /\.js$/,
+        loader: "source-map-loader"
+      }
+    ]
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.json']

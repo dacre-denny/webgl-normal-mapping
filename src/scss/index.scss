@@ -1,0 +1,11 @@
+canvas {
+    opacity: 0.5;
+}
+
+.panel {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background: red;
+    z-index: 1;
+}

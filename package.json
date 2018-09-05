@@ -16,18 +16,28 @@
   "license": "MIT",
   "homepage": "https://github.com/mooce/webgl-normal-mapping#readme",
   "devDependencies": {
+    "awesome-typescript-loader": "^5.2.0",
     "copy-webpack-plugin": "^4.5.2",
+    "css-loader": "^1.0.0",
+    "node-sass": "^4.9.3",
+    "sass-loader": "^7.1.0",
+    "source-map-loader": "^0.2.4",
+    "style-loader": "^0.23.0",
     "ts-loader": "^4.4.2",
-    "typescript": "^3.0.1",
-    "webpack": "^4.16.5",
+    "typescript": "^3.0.3",
+    "webpack": "^4.17.2",
     "webpack-cli": "^2.1.5",
     "webpack-dev-server": "^3.1.4"
   },
   "dependencies": {
     "@types/gl-matrix": "^2.4.1",
     "@types/lodash": "^4.14.116",
+    "@types/react": "^16.4.13",
+    "@types/react-dom": "^16.0.7",
     "@types/webgl2": "0.0.4",
     "gl-matrix": "^2.7.1",
-    "lodash": "^4.17.10"
+    "lodash": "^4.17.10",
+    "react": "^16.4.2",
+    "react-dom": "^16.4.2"
   }
 }

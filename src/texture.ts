@@ -1,4 +1,4 @@
-export async function loadTexture(gl, url) {
+export async function loadTexture(gl: WebGLRenderingContext, url: string) {
   const texture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, texture);
 
@@ -26,11 +26,11 @@ export async function loadTexture(gl, url) {
     const image = new Image();
     image.crossOrigin = "anonymous";
 
-    image.onerror = function(err) {
+    image.onerror = function (err) {
       reject(err);
     };
 
-    image.onload = function() {
+    image.onload = function () {
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.texImage2D(
         gl.TEXTURE_2D,
@@ -58,6 +58,6 @@ export async function loadTexture(gl, url) {
   return texture;
 }
 
-function isPowerOf2(value) {
+function isPowerOf2(value: number) {
   return (value & (value - 1)) == 0;
 }
