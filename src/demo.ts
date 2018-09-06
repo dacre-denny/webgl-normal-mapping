@@ -3,11 +3,12 @@ import { mat4, vec3 } from "gl-matrix";
 import Shader from "./shader";
 import * as textures from "./texture";
 import * as geometry from "./geometry";
+import * as helpers from "./helpers";
+import * as clock from "./clock";
 import Camera from "./camera";
 import cube from "./cube";
 
-let clockLast = Date.now();
-let clock = 0;
+let time = 0;
 
 const camera = Camera.Create();
 camera.setPosition(1, 2, 5);
@@ -54,9 +55,9 @@ function renderLights() {
 
     vec3.set(
       lights[i].position,
-      Math.sin(Math.PI + clock + (i * 0.5)) * 2,
-      Math.sin(Math.PI + clock + (i * 0.5) * 0.5) * 2,
-      Math.cos(Math.PI + clock + (i * 0.5)) * 2
+      Math.sin(Math.PI + time + (i * 0.5)) * 2,
+      Math.sin(Math.PI + time + (i * 0.5) * 0.5) * 2,
+      Math.cos(Math.PI + time + (i * 0.5)) * 2
     );
   }
 
@@ -184,19 +185,13 @@ export async function create(canvas: HTMLCanvasElement) {
   objectGeometry = geometry.loadGeometry(gl, cube);
 }
 
-function updateClock() {
-  const clockNow = (Date.now() / 1000.0)
-
-  clock += (clockNow - clockLast) * paramAnimation
-  clockLast = clockNow;
-}
 
 function renderObject() {
-  const rotationMatrix = mat4.fromZRotation(mat4.create(), clock);
+  const rotationMatrix = mat4.fromZRotation(mat4.create(), time);
 
   const translationMatrix = mat4.fromTranslation(mat4.create(), [
     0,
-    Math.sin(clock),
+    Math.sin(time),
     0
   ]);
 
@@ -244,7 +239,7 @@ export function render() {
 
   renderAxis();
 
-  updateClock();
+  time += clock.update() * paramAnimation;
 }
 
 export function setNormalDepth(depth: number) {
