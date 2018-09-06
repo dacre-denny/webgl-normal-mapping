@@ -1,0 +1,37 @@
+.slider {
+    label {
+        color: #10dad1;
+        font-family: monospace;
+        font-size: 1rem;
+        text-shadow: #000 1px 1px solid;
+    }
+
+    input[type=range] {
+        background: none;
+        height: 30px;
+        -webkit-appearance: none;
+        margin: 0;
+        width: 100%;
+
+        &:focus {
+            outline: none;
+        }
+
+        &::-webkit-slider-runnable-track {
+            width: 300px;
+            height: 5px;
+            background: #ddd;
+            border: none;
+            border-radius: 3px;
+        }
+
+        &::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            border: none;
+            height: 5px;
+            width: 16px;
+            border-radius: 3px;
+            background: #10dad1;
+        }
+    }
+}

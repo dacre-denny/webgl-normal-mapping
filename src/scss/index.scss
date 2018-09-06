@@ -1,9 +1,10 @@
+@import "./slider.scss";
+
 canvas {}
 
 .panel {
     position: fixed;
     top: 1rem;
     right: 1rem;
-    background: red;
     z-index: 1;
 }

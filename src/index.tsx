@@ -10,9 +10,11 @@ import Alert from "./components/alert";
 interface State {
   error?: Error,
   loading: boolean,
-  normalDepth: number,
-  animationSpeed: number,
-  lightCount: number
+  controls: {
+    normal: number,
+    animation: number,
+    lights: number
+  }
 }
 
 class Container extends React.Component {
@@ -20,9 +22,11 @@ class Container extends React.Component {
   state: State = {
     error: undefined,
     loading: false,
-    normalDepth: 0.5,
-    animationSpeed: 1.0,
-    lightCount: 3
+    controls: {
+      normal: 0.5,
+      animation: 1.0,
+      lights: 3
+    }
   }
 
   canvas: React.RefObject<HTMLCanvasElement>
@@ -31,6 +35,33 @@ class Container extends React.Component {
     super(props);
 
     this.canvas = React.createRef<HTMLCanvasElement>();
+  }
+
+  private onChangeNormal(normalDepth: number) {
+
+    Demo.setNormalDepth(normalDepth)
+
+    this.setState({
+      controls: { ...this.state.controls, normalDepth }
+    })
+  }
+
+  private onChangeLights(lightCount: number) {
+
+    Demo.setLightCount(lightCount)
+
+    this.setState({
+      controls: { ...this.state.controls, lightCount }
+    })
+  }
+
+  private onChangeAnimation(animationSpeed: number) {
+
+    Demo.setAnimationSpeed(animationSpeed)
+
+    this.setState({
+      controls: { ...this.state.controls, animationSpeed }
+    })
   }
 
   private onRenderFrame() {
@@ -61,13 +92,14 @@ class Container extends React.Component {
 
   render() {
 
-    const { error, loading } = this.state
+    const { error, loading, controls } = this.state
 
     return <div>
       <div className="panel">
         <Switch label="Normal Mapping" />
-        <Switch label="Animation" />
-        <Slider label="Light" min={1} max={2} />
+        <Slider label="Animation" min={0} max={1} step={0.01} value={controls.animation} onChange={value => this.onChangeAnimation(value)} />
+        <Slider label="Normal Mapping" min={0} max={1} step={0.01} value={controls.normal} onChange={value => this.onChangeNormal(value)} />
+        <Slider label="Light" min={1} max={5} step={1} value={controls.lights} onChange={value => this.onChangeLights(value)} />
       </div>
       {loading && <Loading />}
       {error && <Alert error={error} />}
