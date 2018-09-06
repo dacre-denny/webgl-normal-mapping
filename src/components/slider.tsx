@@ -10,6 +10,7 @@ export default (props: {
 }) => (
     <div className="slider">
       <label>{props.label}</label>
+      <span>{props.value}</span>
       <input type="range" min={props.min} max={props.max} step={props.step} value={props.value} onChange={event => props.onChange(parseFloat(event.target.value))} />
     </div>
   );

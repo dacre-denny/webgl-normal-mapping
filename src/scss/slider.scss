@@ -1,14 +1,24 @@
 .slider {
+    position: relative;
+    font-family: monospace;
+    font-size: 1rem;
+
     label {
-        color: #10dad1;
-        font-family: monospace;
-        font-size: 1rem;
+        color: #da1064;
         text-shadow: #000 1px 1px solid;
+    }
+
+    span {
+        position: absolute;
+        top: 0;
+        right: 0;
+        color: #777;
     }
 
     input[type=range] {
         background: none;
         height: 30px;
+        cursor: pointer;
         -webkit-appearance: none;
         margin: 0;
         width: 100%;
@@ -17,10 +27,16 @@
             outline: none;
         }
 
+        &:hover {
+            &::-webkit-slider-runnable-track {
+                background: #fff;
+            }
+        }
+
         &::-webkit-slider-runnable-track {
             width: 300px;
             height: 5px;
-            background: #ddd;
+            background: #ccc;
             border: none;
             border-radius: 3px;
         }

@@ -37,30 +37,30 @@ class Container extends React.Component {
     this.canvas = React.createRef<HTMLCanvasElement>();
   }
 
-  private onChangeNormal(normalDepth: number) {
+  private onChangeNormal(normal: number) {
 
-    Demo.setNormalDepth(normalDepth)
+    Demo.setNormalDepth(normal)
 
     this.setState({
-      controls: { ...this.state.controls, normalDepth }
+      controls: { ...this.state.controls, normal }
     })
   }
 
-  private onChangeLights(lightCount: number) {
+  private onChangeLights(lights: number) {
 
-    Demo.setLightCount(lightCount)
+    Demo.setLightCount(lights)
 
     this.setState({
-      controls: { ...this.state.controls, lightCount }
+      controls: { ...this.state.controls, lights }
     })
   }
 
-  private onChangeAnimation(animationSpeed: number) {
+  private onChangeAnimation(animation: number) {
 
-    Demo.setAnimationSpeed(animationSpeed)
+    Demo.setAnimationSpeed(animation)
 
     this.setState({
-      controls: { ...this.state.controls, animationSpeed }
+      controls: { ...this.state.controls, animation }
     })
   }
 
@@ -96,10 +96,10 @@ class Container extends React.Component {
 
     return <div>
       <div className="panel">
-        <Switch label="Normal Mapping" />
-        <Slider label="Animation" min={0} max={1} step={0.01} value={controls.animation} onChange={value => this.onChangeAnimation(value)} />
+        <h1>Normal Mapping</h1>
+        <Slider label="Animation Speed" min={0} max={1} step={0.01} value={controls.animation} onChange={value => this.onChangeAnimation(value)} />
         <Slider label="Normal Mapping" min={0} max={1} step={0.01} value={controls.normal} onChange={value => this.onChangeNormal(value)} />
-        <Slider label="Light" min={1} max={5} step={1} value={controls.lights} onChange={value => this.onChangeLights(value)} />
+        <Slider label="Lights" min={1} max={5} step={1} value={controls.lights} onChange={value => this.onChangeLights(value)} />
       </div>
       {loading && <Loading />}
       {error && <Alert error={error} />}
