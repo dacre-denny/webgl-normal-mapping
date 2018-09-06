@@ -1,5 +1,5 @@
 import { vec2, vec3 } from "gl-matrix";
-import { Shader } from "./shader";
+import Shader from "./shader";
 
 interface Geometry {
   attributes: { [key: string]: { offset: number; components: number } };
@@ -88,7 +88,7 @@ export function bindBufferAndProgram(
   for (const name in geometry.attributes) {
     const attribute = geometry.attributes[name];
 
-    const index = gl.getAttribLocation(shader.program, name);
+    const index = shader.getAttributeIndex(gl, name);
 
     gl.vertexAttribPointer(
       index,
@@ -106,7 +106,7 @@ export function bindBufferAndProgram(
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, geometry.indices);
   }
 
-  gl.useProgram(shader.program);
+  shader.use(gl);
 }
 
 export function drawBuffer(

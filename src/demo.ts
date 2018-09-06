@@ -2,7 +2,7 @@ import "./scss/index.scss";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { mat4, vec3 } from "gl-matrix";
-import * as shader from "./shader";
+import Shader from "./shader";
 import * as textures from "./texture";
 import * as geometry from "./geometry";
 import Camera from "./camera";
@@ -44,8 +44,8 @@ let objectGeometry: any;
 let textureColor: WebGLTexture
 let textureNormal: WebGLTexture;
 
-let normalShader: shader.Shader
-let wireframeShader: shader.Shader;
+let normalShader: Shader
+let wireframeShader: Shader;
 
 let paramDepth: number = 0.5;
 let paramAnimation: number = 1;
@@ -75,9 +75,9 @@ function renderLights() {
     Math.sin(0.5 * clock) * 2
   );
 
-  gl.useProgram(wireframeShader.program);
+  wireframeShader.use(gl);
 
-  shader.updateUniforms(gl, wireframeShader, {
+  wireframeShader.updateUniforms(gl, {
     uProjectionMatrix: camera.getProjection(),
     uViewMatrix: camera.getView()
   });
@@ -86,7 +86,7 @@ function renderLights() {
     const lightTranslation = mat4.create();
     mat4.fromTranslation(lightTranslation, light.position);
 
-    shader.updateUniforms(gl, wireframeShader, {
+    wireframeShader.updateUniforms(gl, {
       uWorldMatrix: lightTranslation
     });
 
@@ -96,13 +96,13 @@ function renderLights() {
 }
 
 function renderAxis() {
-  gl.useProgram(wireframeShader.program);
+  wireframeShader.use(gl)
 
-  shader.updateUniforms(gl, wireframeShader, {
+  wireframeShader.updateUniforms(gl, {
     uProjectionMatrix: camera.getProjection(),
     uViewMatrix: camera.getView(),
     uWorldMatrix: mat4.create()
-  });
+  })
 
   geometry.bindBufferAndProgram(gl, wireframeShader, axisGeometry);
 
@@ -155,14 +155,14 @@ export async function create(canvas: HTMLCanvasElement) {
     "./textures/EC_Stone_Wall_Normal.jpg"
   );
 
-  normalShader = await shader.loadProgram(
+  normalShader = await Shader.create(
     gl,
     "./shaders/normal.vs",
     "./shaders/normal.fs",
     ["LIGHTS " + lights.length]
   );
 
-  wireframeShader = await shader.loadProgram(
+  wireframeShader = await Shader.create(
     gl,
     "./shaders/simple.vs",
     "./shaders/simple.fs"
@@ -197,9 +197,9 @@ function renderObject() {
     rotationMatrix
   );
 
-  gl.useProgram(normalShader.program);
+  normalShader.use(gl);
 
-  shader.updateUniforms(gl, normalShader, {
+  normalShader.updateUniforms(gl, {
     lights: lights,
     normalScale: paramDepth,
     uTextureNormal: textureNormal,

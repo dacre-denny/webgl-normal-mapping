@@ -51,107 +51,118 @@ function isWebGl(info: WebGLActiveInfo) {
   return name.startsWith("gl_") || name.startsWith("webgl_");
 }
 
-export interface Shader {
-  program: WebGLProgram;
-  //attributes: any;
-  uniforms: any;
-}
+export default class Shader {
+  private program: WebGLProgram;
 
-export function updateUniforms(
-  gl: WebGLRenderingContext,
-  shader: Shader,
-  attributes: { [key: string]: any }
-) {
-  const n = gl.getProgramParameter(shader.program, gl.ACTIVE_UNIFORMS);
-  let unit = 0;
+  public use(gl: WebGLRenderingContext) {
+    gl.useProgram(this.program);
+  }
 
-  for (let i = 0; i < n; i++) {
-    const info = gl.getActiveUniform(shader.program, i);
-    if (isWebGl(info)) {
-      continue;
-    }
+  public getAttributeIndex(gl: WebGLRenderingContext, name: string) {
 
-    const value = _.get(attributes, info.name); //[info.name];
-    if (!value) {
-      continue;
-    }
+    return gl.getAttribLocation(this.program, name);
+  }
 
-    const location = gl.getUniformLocation(shader.program, info.name);
+  public updateUniforms(
+    gl: WebGLRenderingContext,
+    attributes: { [key: string]: any }
+  ) {
+    const n = gl.getProgramParameter(this.program, gl.ACTIVE_UNIFORMS);
+    let unit = 0;
 
-    switch (info.type) {
-      case FLOAT: {
-        gl.uniform1f(location, value);
-        break;
+    for (let i = 0; i < n; i++) {
+      const info = gl.getActiveUniform(this.program, i);
+      if (isWebGl(info)) {
+        continue;
       }
-      case FLOAT_VEC2: {
-        gl.uniform2fv(location, value);
-        break;
-      }
-      case FLOAT_VEC3: {
-        gl.uniform3fv(location, value);
-        break;
-      }
-      case FLOAT_VEC4: {
-        gl.uniform4fv(location, value);
-        break;
-      }
-      case FLOAT_MAT4: {
-        gl.uniformMatrix4fv(location, false, value);
-        break;
-      }
-      case SAMPLER_2D: {
-        gl.uniform1i(location, unit);
 
-        gl.activeTexture(gl.TEXTURE0 + unit);
+      const value = _.get(attributes, info.name); //[info.name];
+      if (!value) {
+        continue;
+      }
 
-        gl.bindTexture(gl.TEXTURE_2D, value);
+      const location = gl.getUniformLocation(this.program, info.name);
 
-        unit++;
-        break;
+      switch (info.type) {
+        case FLOAT: {
+          gl.uniform1f(location, value);
+          break;
+        }
+        case FLOAT_VEC2: {
+          gl.uniform2fv(location, value);
+          break;
+        }
+        case FLOAT_VEC3: {
+          gl.uniform3fv(location, value);
+          break;
+        }
+        case FLOAT_VEC4: {
+          gl.uniform4fv(location, value);
+          break;
+        }
+        case FLOAT_MAT4: {
+          gl.uniformMatrix4fv(location, false, value);
+          break;
+        }
+        case SAMPLER_2D: {
+          gl.uniform1i(location, unit);
+
+          gl.activeTexture(gl.TEXTURE0 + unit);
+
+          gl.bindTexture(gl.TEXTURE_2D, value);
+
+          unit++;
+          break;
+        }
       }
     }
   }
-}
 
-export async function loadProgram(
-  gl: WebGLRenderingContext,
-  vsSource: string,
-  fsSource: string,
-  defines: string[] = []
-) {
-  const definitions = defines
-    .map(definition => `#define ${definition}`)
-    .join("\n");
-  const vertexShader = await loadShader(
-    gl,
-    gl.VERTEX_SHADER,
-    vsSource,
-    definitions
-  );
-  const fragmentShader = await loadShader(
-    gl,
-    gl.FRAGMENT_SHADER,
-    fsSource,
-    definitions
-  );
+  public reload() {
 
-  const program = gl.createProgram();
-  gl.attachShader(program, vertexShader);
-  gl.attachShader(program, fragmentShader);
-  gl.linkProgram(program);
+  }
 
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    console.error(
-      "Unable to initialize the shader program: " +
-      gl.getProgramInfoLog(program)
+  public static async create(
+    gl: WebGLRenderingContext,
+    vsSource: string,
+    fsSource: string,
+    defines: string[] = []) {
+
+    const definitions = defines
+      .map(definition => `#define ${definition}`)
+      .join("\n");
+    const vertexShader = await loadShader(
+      gl,
+      gl.VERTEX_SHADER,
+      vsSource,
+      definitions
     );
-    return null;
-  }
+    const fragmentShader = await loadShader(
+      gl,
+      gl.FRAGMENT_SHADER,
+      fsSource,
+      definitions
+    );
 
-  return <Shader>{
-    program: program
-  };
+    const program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.error(
+        "Unable to initialize the shader program: " +
+        gl.getProgramInfoLog(program)
+      );
+      return null;
+    }
+
+    const shader = new Shader()
+    shader.program = program
+    return shader
+  }
 }
+
 
 async function loadShader(
   gl: WebGLRenderingContext,
