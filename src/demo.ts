@@ -1,15 +1,10 @@
 import "./scss/index.scss";
-import * as React from "react";
-import * as ReactDOM from "react-dom";
 import { mat4, vec3 } from "gl-matrix";
 import Shader from "./shader";
 import * as textures from "./texture";
 import * as geometry from "./geometry";
 import Camera from "./camera";
 import cube from "./cube";
-import Switch from "./components/switch";
-import Slider from "./components/slider";
-import { element } from "prop-types";
 
 let clockLast = Date.now();
 let clock = 0;
@@ -19,7 +14,7 @@ camera.setPosition(1, 2, 5);
 camera.setLookAt(0, 0, 0);
 
 const ambient = vec3.fromValues(0.1, 0.1, 0.1);
-const lights = [
+let lights = [
   {
     position: vec3.fromValues(2, 1, 2),
     color: vec3.fromValues(0.85, 0.95, 1),
@@ -54,26 +49,37 @@ let paramLight: number = 3;
 let gl: WebGLRenderingContext
 
 function renderLights() {
-  vec3.set(
-    lights[0].position,
-    Math.sin(clock) * 2,
-    Math.sin(clock * 0.5) * 2,
-    Math.cos(clock) * 2
-  );
 
-  vec3.set(
-    lights[1].position,
-    Math.sin(Math.PI + clock) * 2,
-    Math.sin(Math.PI + clock * 0.5) * 2,
-    Math.cos(Math.PI + clock) * 2
-  );
+  for (var i = 0; i < lights.length; i++) {
 
-  vec3.set(
-    lights[2].position,
-    Math.sin(0.5 * clock * 0.5) * 2,
-    Math.cos(0.5 * clock) * 2,
-    Math.sin(0.5 * clock) * 2
-  );
+    vec3.set(
+      lights[i].position,
+      Math.sin(Math.PI + clock + (i * 0.5)) * 2,
+      Math.sin(Math.PI + clock + (i * 0.5) * 0.5) * 2,
+      Math.cos(Math.PI + clock + (i * 0.5)) * 2
+    );
+  }
+
+  // vec3.set(
+  //   lights[0].position,
+  //   Math.sin(clock) * 2,
+  //   Math.sin(clock * 0.5) * 2,
+  //   Math.cos(clock) * 2
+  // );
+
+  // vec3.set(
+  //   lights[1].position,
+  //   Math.sin(Math.PI + clock) * 2,
+  //   Math.sin(Math.PI + clock * 0.5) * 2,
+  //   Math.cos(Math.PI + clock) * 2
+  // );
+
+  // vec3.set(
+  //   lights[2].position,
+  //   Math.sin(0.5 * clock * 0.5) * 2,
+  //   Math.cos(0.5 * clock) * 2,
+  //   Math.sin(0.5 * clock) * 2
+  // );
 
   wireframeShader.use(gl);
 
@@ -130,14 +136,17 @@ export async function create(canvas: HTMLCanvasElement) {
   });
 
   canvas.addEventListener("mousemove", (event: MouseEvent) => {
-    const dx = event.movementX / document.body.clientWidth;
-    const position = vec3.rotateY(
-      vec3.create(),
-      camera.getPosition(),
-      camera.getLookAt(),
-      dx * 30
-    );
-    camera.setPosition(position[0], position[1], position[2]);
+    if (event.buttons > 0) {
+
+      const dx = event.movementX / document.body.clientWidth;
+      const position = vec3.rotateY(
+        vec3.create(),
+        camera.getPosition(),
+        camera.getLookAt(),
+        dx * 30
+      );
+      camera.setPosition(position[0], position[1], position[2]);
+    }
   });
 
   window.addEventListener("resize", () => {
@@ -248,7 +257,34 @@ export function setAnimationSpeed(speed: number) {
   paramAnimation = speed;
 }
 
+var loading = false;
+
 export function setLightCount(count: number) {
+
+  lights = []
+
+  for (var i = 0; i < count; i++) {
+    lights.push({
+      position: vec3.fromValues(2, 1, 2),
+      color: vec3.fromValues(Math.sin(i * 0.1), Math.sin(i * 0.3), Math.cos(i * 0.1)),
+      range: 0.5
+    })
+  }
+
+  if (!loading) {
+    loading = true;
+    Shader.create(
+      gl,
+      "./shaders/normal.vs",
+      "./shaders/normal.fs",
+      ["LIGHTS " + lights.length]
+    ).then(shader => {
+
+      normalShader.release(gl)
+      normalShader = shader
+      loading = true
+    });
+  }
 
   paramLight = count
 }

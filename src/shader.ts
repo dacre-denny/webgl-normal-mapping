@@ -118,8 +118,16 @@ export default class Shader {
     }
   }
 
-  public reload() {
+  public async release(
+    gl: WebGLRenderingContext) {
 
+    const shaders = gl.getAttachedShaders(this.program)
+
+    for (const shader of shaders) {
+      gl.deleteShader(shader)
+    }
+
+    gl.deleteProgram(this.program)
   }
 
   public static async create(
