@@ -143,7 +143,7 @@ export async function loadProgram(
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
     console.error(
       "Unable to initialize the shader program: " +
-        gl.getProgramInfoLog(program)
+      gl.getProgramInfoLog(program)
     );
     return null;
   }

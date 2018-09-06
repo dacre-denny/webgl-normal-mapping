@@ -11,9 +11,8 @@ import Switch from "./components/switch";
 import Slider from "./components/slider";
 import { element } from "prop-types";
 
-/**
- * 
 let clockLast = Date.now();
+let clock = 0;
 
 const camera = Camera.Create();
 camera.setPosition(1, 2, 5);
@@ -37,43 +36,6 @@ const lights = [
     range: 0.5
   }
 ];
-
-function applyWindowSize() {
-  camera.setAspectRatio(document.body.clientWidth / document.body.clientHeight);
-}
-
-window.addEventListener("resize", () => {
-  applyWindowSize();
-});
-
- */
-
-let clockLast = Date.now();
-
-const camera = Camera.Create();
-camera.setPosition(1, 2, 5);
-camera.setLookAt(0, 0, 0);
-
-const ambient = vec3.fromValues(0.1, 0.1, 0.1);
-const lights = [
-  {
-    position: vec3.fromValues(2, 1, 2),
-    color: vec3.fromValues(0.85, 0.95, 1),
-    range: 0.25
-  },
-  {
-    position: vec3.fromValues(2, 1, 2),
-    color: vec3.fromValues(0.35, 0.95, 1),
-    range: 1.0
-  },
-  {
-    position: vec3.fromValues(2, 1, 2),
-    color: vec3.fromValues(0.85, 0.45, 0.4),
-    range: 0.5
-  }
-];
-
-
 
 let axisGeometry: any
 let lightGeometry: any
@@ -85,28 +47,32 @@ let textureNormal: WebGLTexture;
 let normalShader: shader.Shader
 let wireframeShader: shader.Shader;
 
+let paramDepth: number = 0.5;
+let paramAnimation: number = 1;
+let paramLight: number = 3;
+
 let gl: WebGLRenderingContext
 
 function renderLights() {
   vec3.set(
     lights[0].position,
-    Math.sin(clockLast) * 2,
-    Math.sin(clockLast * 0.5) * 2,
-    Math.cos(clockLast) * 2
+    Math.sin(clock) * 2,
+    Math.sin(clock * 0.5) * 2,
+    Math.cos(clock) * 2
   );
 
   vec3.set(
     lights[1].position,
-    Math.sin(Math.PI + clockLast) * 2,
-    Math.sin(Math.PI + clockLast * 0.5) * 2,
-    Math.cos(Math.PI + clockLast) * 2
+    Math.sin(Math.PI + clock) * 2,
+    Math.sin(Math.PI + clock * 0.5) * 2,
+    Math.cos(Math.PI + clock) * 2
   );
 
   vec3.set(
     lights[2].position,
-    Math.sin(0.5 * clockLast * 0.5) * 2,
-    Math.cos(0.5 * clockLast) * 2,
-    Math.sin(0.5 * clockLast) * 2
+    Math.sin(0.5 * clock * 0.5) * 2,
+    Math.cos(0.5 * clock) * 2,
+    Math.sin(0.5 * clock) * 2
   );
 
   gl.useProgram(wireframeShader.program);
@@ -210,16 +176,18 @@ export async function create(canvas: HTMLCanvasElement) {
 }
 
 function updateClock() {
-  const clockNow = Date.now() / 1000.0;
+  const clockNow = (Date.now() / 1000.0)
+
+  clock += (clockNow - clockLast) * paramAnimation
   clockLast = clockNow;
 }
 
 function renderObject() {
-  const rotationMatrix = mat4.fromZRotation(mat4.create(), clockLast);
+  const rotationMatrix = mat4.fromZRotation(mat4.create(), clock);
 
   const translationMatrix = mat4.fromTranslation(mat4.create(), [
     0,
-    Math.sin(clockLast),
+    Math.sin(clock),
     0
   ]);
 
@@ -233,6 +201,7 @@ function renderObject() {
 
   shader.updateUniforms(gl, normalShader, {
     lights: lights,
+    normalScale: paramDepth,
     uTextureNormal: textureNormal,
     uTextureColor: textureColor,
     uProjectionMatrix: camera.getProjection(),
@@ -271,12 +240,15 @@ export function render() {
 
 export function setNormalDepth(depth: number) {
 
+  paramDepth = depth
 }
 
 export function setAnimationSpeed(speed: number) {
 
+  paramAnimation = speed;
 }
 
 export function setLightCount(count: number) {
 
+  paramLight = count
 }

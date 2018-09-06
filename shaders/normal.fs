@@ -17,6 +17,7 @@ uniform sampler2D uTextureNormal;
 
 uniform Light lights[LIGHTS];
 uniform vec3 ambient;
+uniform float normalScale;
  
 varying vec2 vTextureCoord;
 varying vec3 vPosition;
@@ -54,7 +55,9 @@ void main() {
 
   vec3 viewDirection = normalize(tangentViewPosition.xyz - tangentVertexPosition.xyz);
   
-  vec3 texelNormal = normalize(texture2D(uTextureNormal, vTextureCoord).xyz * 2.0 - 1.0);
+  
+
+  vec3 texelNormal = normalize(mix(vec3(0.0,0.0,1.0), texture2D(uTextureNormal, vTextureCoord).xyz * 2.0 - 1.0, normalScale));
   vec3 texelColor = texture2D(uTextureColor, vTextureCoord).xyz;
   
   vec3 lighting = computeLighting(viewDirection, texelNormal);
