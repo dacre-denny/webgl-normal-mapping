@@ -2,10 +2,9 @@ import "./scss/index.scss";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as Demo from "./demo";
-import Loading from "./components/loading";
 import Switch from "./components/switch";
 import Slider from "./components/slider";
-import Alert from "./components/alert";
+import Alert from "./components/error";
 
 interface State {
   error?: Error,
@@ -69,15 +68,15 @@ class Container extends React.Component {
     requestAnimationFrame(() => this.onRenderFrame())
   }
 
-  async componentDidMount() {
-
+  componentDidMount() {
     this.setState({ loading: true })
 
-    await Demo.create(this.canvas.current)
+    Demo.create(this.canvas.current).then(() => {
 
-    this.onRenderFrame()
+      this.onRenderFrame()
 
-    this.setState({ loading: false })
+      this.setState({ loading: false })
+    })
   }
 
   componentWillUnmount() {
@@ -87,7 +86,7 @@ class Container extends React.Component {
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
 
-    this.setState({ error })
+    this.setState({ error, loading: false })
   }
 
   render() {
@@ -95,14 +94,13 @@ class Container extends React.Component {
     const { error, loading, controls } = this.state
 
     return <div>
-      <div className="panel">
+      <div className={`panel ${loading ? 'loading' : ''}`}>
         <h1>Normal Mapping</h1>
         <Slider label="Animation Speed" min={0} max={1} step={0.01} value={controls.animation} onChange={value => this.onChangeAnimation(value)} />
         <Slider label="Normal Mapping" min={0} max={1} step={0.01} value={controls.normal} onChange={value => this.onChangeNormal(value)} />
         <Slider label="Lights" min={1} max={5} step={1} value={controls.lights} onChange={value => this.onChangeLights(value)} />
+        {error && <Alert error={error} />}
       </div>
-      {loading && <Loading />}
-      {error && <Alert error={error} />}
       <canvas ref={this.canvas} width="1920" height="1080"></canvas>
     </div>
   }

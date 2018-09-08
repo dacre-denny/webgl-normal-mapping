@@ -1,0 +1,42 @@
+.panel {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1;
+    width: 15rem;
+
+    h1 {
+        color: #777;
+        font-size: 1rem;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: normal;
+        margin: 0;
+        margin-bottom: 1rem;
+    }
+
+    &.loading {
+        @keyframes spinner {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        &::after {
+            animation: spinner 0.5s linear infinite;
+            position: absolute;
+            height: 1rem;
+            width: 1rem;
+            top: 0;
+            right: 0;
+            content: '';
+            border: 2px solid #da1064;
+            border-bottom-color: transparent;
+            border-right-color: transparent;
+            border-radius: 1rem;
+        }
+    }
+}

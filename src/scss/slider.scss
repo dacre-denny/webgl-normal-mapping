@@ -3,6 +3,17 @@
     font-family: 'Montserrat', sans-serif;
     font-size: 0.75rem;
 
+    .loading & {
+        pointer-events: none;
+        cursor: default;
+
+        input[type=range] {
+            &::-webkit-slider-thumb {
+                background: #999;
+            }
+        }
+    }
+
     label {
         color: #da1064;
         text-shadow: #000 1px 1px solid;
@@ -16,6 +27,7 @@
     }
 
     input[type=range] {
+        cursor: pointer;
         background: none;
         height: 30px;
         cursor: pointer;

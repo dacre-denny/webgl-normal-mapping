@@ -19,6 +19,7 @@
     "awesome-typescript-loader": "^5.2.0",
     "copy-webpack-plugin": "^4.5.2",
     "css-loader": "^1.0.0",
+    "mocha": "^5.2.0",
     "node-sass": "^4.9.3",
     "sass-loader": "^7.1.0",
     "source-map-loader": "^0.2.4",

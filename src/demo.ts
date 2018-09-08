@@ -3,14 +3,13 @@ import { mat4, vec3 } from "gl-matrix";
 import Shader from "./shader";
 import * as textures from "./texture";
 import * as geometry from "./geometry";
-import * as helpers from "./helpers";
 import * as clock from "./clock";
 import Camera from "./camera";
 import cube from "./cube";
 
 let time = 0;
 
-const camera = Camera.Create();
+const camera = new Camera();
 camera.setPosition(1, 2, 5);
 camera.setLookAt(0, 0, 0);
 

@@ -2,7 +2,7 @@ import { mat4, vec3 } from "gl-matrix";
 import * as helpers from "./helpers";
 
 export default class Camera {
-  private constructor() {}
+
   private viewMatrix: mat4;
   private projMatrix: mat4;
   private position = vec3.create();
@@ -11,10 +11,6 @@ export default class Camera {
   private fov = (70 * Math.PI) / 180;
   private near = 0.1;
   private far = 100.0;
-
-  public static Create() {
-    return new Camera();
-  }
 
   public setFOV(fov: number) {
     this.fov = helpers.clamp(
