@@ -16,19 +16,29 @@ camera.setLookAt(0, 0, 0);
 const ambient = vec3.fromValues(0.1, 0.1, 0.1);
 let lights = [
   {
-    position: vec3.fromValues(2, 1, 2),
+    position: vec3.create(),
     color: vec3.fromValues(0.85, 0.95, 1),
     range: 0.25
   },
   {
-    position: vec3.fromValues(2, 1, 2),
+    position: vec3.create(),
     color: vec3.fromValues(0.35, 0.95, 1),
     range: 1.0
   },
   {
-    position: vec3.fromValues(2, 1, 2),
+    position: vec3.create(),
     color: vec3.fromValues(0.85, 0.45, 0.4),
     range: 0.5
+  },
+  {
+    position: vec3.create(),
+    color: vec3.fromValues(0.85, 0.4, 0.45),
+    range: 0.5
+  },
+  {
+    position: vec3.create(),
+    color: vec3.fromValues(0.45, 0.85, 0.4),
+    range: 1.5
   }
 ];
 
@@ -42,9 +52,7 @@ let textureNormal: WebGLTexture;
 let normalShader: Shader
 let wireframeShader: Shader;
 
-let paramDepth: number = 0.5;
-let paramAnimation: number = 1;
-let paramLight: number = 3;
+let animationSpeed: number = 1;
 
 let gl: WebGLRenderingContext
 
@@ -52,34 +60,15 @@ function renderLights() {
 
   for (var i = 0; i < lights.length; i++) {
 
+    const phase = time + 2.0 * Math.PI * (i / lights.length)
+
     vec3.set(
       lights[i].position,
-      Math.sin(Math.PI + time + (i * 0.5)) * 2,
-      Math.sin(Math.PI + time + (i * 0.5) * 0.5) * 2,
-      Math.cos(Math.PI + time + (i * 0.5)) * 2
+      Math.sin(phase) * 2,
+      Math.sin(phase + time) * 2,
+      Math.cos(phase) * 2
     );
   }
-
-  // vec3.set(
-  //   lights[0].position,
-  //   Math.sin(clock) * 2,
-  //   Math.sin(clock * 0.5) * 2,
-  //   Math.cos(clock) * 2
-  // );
-
-  // vec3.set(
-  //   lights[1].position,
-  //   Math.sin(Math.PI + clock) * 2,
-  //   Math.sin(Math.PI + clock * 0.5) * 2,
-  //   Math.cos(Math.PI + clock) * 2
-  // );
-
-  // vec3.set(
-  //   lights[2].position,
-  //   Math.sin(0.5 * clock * 0.5) * 2,
-  //   Math.cos(0.5 * clock) * 2,
-  //   Math.sin(0.5 * clock) * 2
-  // );
 
   wireframeShader.use(gl);
 
@@ -177,6 +166,11 @@ export async function create(canvas: HTMLCanvasElement) {
     "./shaders/simple.fs"
   );
 
+  normalShader.use(gl)
+  normalShader.updateUniforms(gl, {
+    normalScale: 0.5
+  })
+
   axisGeometry = geometry.createAxis(gl);
 
   lightGeometry = geometry.createLight(gl, 0.5);
@@ -204,7 +198,6 @@ function renderObject() {
 
   normalShader.updateUniforms(gl, {
     lights: lights,
-    normalScale: paramDepth,
     uTextureNormal: textureNormal,
     uTextureColor: textureColor,
     uProjectionMatrix: camera.getProjection(),
@@ -238,32 +231,35 @@ export function render() {
 
   renderAxis();
 
-  time += clock.update() * paramAnimation;
+  time += clock.update() * animationSpeed;
 }
 
 export function setNormalDepth(depth: number) {
 
-  paramDepth = depth
+  normalShader.use(gl);
+  normalShader.updateUniforms(gl, {
+    normalScale: depth
+  })
 }
 
 export function setAnimationSpeed(speed: number) {
 
-  paramAnimation = speed;
+  animationSpeed = speed;
 }
 
 var loading = false;
 
 export function setLightCount(count: number) {
 
-  lights = []
+  // lights = []
 
-  for (var i = 0; i < count; i++) {
-    lights.push({
-      position: vec3.fromValues(2, 1, 2),
-      color: vec3.fromValues(Math.sin(i * 0.1), Math.sin(i * 0.3), Math.cos(i * 0.1)),
-      range: 0.5
-    })
-  }
+  // for (var i = 0; i < count; i++) {
+  //   lights.push({
+  //     position: vec3.fromValues(2, 1, 2),
+  //     color: vec3.fromValues(Math.sin(i * 0.1), Math.sin(i * 0.3), Math.cos(i * 0.1)),
+  //     range: 0.5
+  //   })
+  // }
 
   if (!loading) {
     loading = true;
@@ -271,14 +267,16 @@ export function setLightCount(count: number) {
       gl,
       "./shaders/normal.vs",
       "./shaders/normal.fs",
-      ["LIGHTS " + lights.length]
+      ["LIGHTS " + count]
     ).then(shader => {
 
       normalShader.release(gl)
       normalShader = shader
+
+      normalShader.updateUniforms(gl, {
+        normalScale: 0.5
+      })
       loading = true
     });
   }
-
-  paramLight = count
 }
