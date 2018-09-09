@@ -3,12 +3,16 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as Demo from "./demo";
 import Slider from "./components/slider";
+import Switch from "./components/switch";
 import InlineError from "./components/error";
+
+type GeometryType = "cube" | "sphere"
 
 interface State {
   error?: Error,
   loading: boolean,
   controls: {
+    geometry: GeometryType,
     normal: number,
     speed: number,
     lights: number
@@ -21,6 +25,7 @@ class Container extends React.Component {
     error: undefined,
     loading: false,
     controls: {
+      geometry: 'cube',
       normal: 0.5,
       speed: 1.0,
       lights: 3
@@ -73,6 +78,14 @@ class Container extends React.Component {
     })
   }
 
+  private onChangeGeometry(geometry: string) {
+
+    this.applySetting(async () => {
+      await Demo.setGeometry(geometry)
+      return { geometry }
+    })
+  }
+
   private onChangeAnimation(speed: number) {
 
     this.applySetting(async () => {
@@ -111,6 +124,7 @@ class Container extends React.Component {
       <Slider label="Animation Speed" min={0} max={1} step={0.01} value={controls.speed} onChange={value => this.onChangeAnimation(value)} />
       <Slider label="Normal Mapping" min={0} max={1} step={0.01} value={controls.normal} onChange={value => this.onChangeNormal(value)} />
       <Slider label="Lights" min={1} max={5} step={1} value={controls.lights} onChange={value => this.onChangeLights(value)} />
+      <Switch label="Geometry" options={[{ value: 'cube', label: 'Cube' }, { value: 'sphere', label: 'Sphere' }]} onClick={value => this.onChangeGeometry(value)} />
       {error && <InlineError error={error} />}
     </div>)
   }

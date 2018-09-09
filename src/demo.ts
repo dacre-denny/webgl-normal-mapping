@@ -181,7 +181,7 @@ export async function loadAssets() {
 
   lightGeometry = geometry.createLight(gl, 0.5);
 
-  const response = await fetch('./geom/sphere.json')
+  const response = await fetch('./geom/cube.json')
   const sphere = await response.json()
 
   objectGeometry = geometry.loadGeometry(gl, sphere);
@@ -260,6 +260,14 @@ export function setNormalDepth(depth: number) {
 export function setAnimationSpeed(speed: number) {
 
   animationSpeed = speed;
+}
+
+export async function setGeometry(geometryType: string) {
+
+  const response = await fetch(`./geom/${geometryType}.json`)
+  const json = await response.json()
+
+  objectGeometry = geometry.loadGeometry(gl, json);
 }
 
 export function setLightCount(count: number) {
