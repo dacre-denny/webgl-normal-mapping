@@ -58,6 +58,8 @@ let gl: WebGLRenderingContext
 
 function renderLights() {
 
+  if (!wireframeShader || !lightGeometry) return
+
   wireframeShader.use(gl);
 
   wireframeShader.updateUniforms(gl, {
@@ -90,6 +92,9 @@ function renderLights() {
 }
 
 function renderAxis() {
+
+  if (!axisGeometry || !wireframeShader) return
+
   wireframeShader.use(gl)
 
   wireframeShader.updateUniforms(gl, {
@@ -108,6 +113,9 @@ function applyWindowSize() {
 }
 
 function renderObject() {
+
+  if (!normalShader || !objectGeometry) return
+
   const rotationMatrix = mat4.fromZRotation(mat4.create(), time);
 
   const translationMatrix = mat4.fromTranslation(mat4.create(), [
@@ -140,41 +148,7 @@ function renderObject() {
   geometry.drawBuffer(gl, objectGeometry);
 }
 
-export async function create(canvas: HTMLCanvasElement) {
-
-  gl = canvas.getContext("webgl") as WebGLRenderingContext;
-  if (!gl) {
-    throw new Error("Unable to initialize WebGL. Your browser or machine may not support it.")
-  }
-
-  canvas.addEventListener("contextmenu", event => event.preventDefault());
-
-  canvas.addEventListener("mousewheel", (event: MouseWheelEvent) => {
-    const vector = camera.getForward();
-    vec3.scale(vector, vector, event.wheelDelta * 0.005);
-    vec3.add(vector, vector, camera.getPosition());
-    camera.setPosition(vector[0], vector[1], vector[2]);
-  });
-
-  canvas.addEventListener("mousemove", (event: MouseEvent) => {
-    if (event.buttons > 0) {
-
-      const dx = event.movementX / document.body.clientWidth;
-      const position = vec3.rotateY(
-        vec3.create(),
-        camera.getPosition(),
-        camera.getLookAt(),
-        dx * 30
-      );
-      camera.setPosition(position[0], position[1], position[2]);
-    }
-  });
-
-  window.addEventListener("resize", () => {
-    applyWindowSize();
-  });
-
-  applyWindowSize()
+export async function loadAssets() {
 
   textureColor = await textures.loadTexture(
     gl,
@@ -213,12 +187,51 @@ export async function create(canvas: HTMLCanvasElement) {
   objectGeometry = geometry.loadGeometry(gl, sphere);
 }
 
+export async function create(canvas: HTMLCanvasElement) {
+
+  gl = canvas.getContext("webgl") as WebGLRenderingContext;
+  if (!gl) {
+    throw new Error("Unable to initialize WebGL. Your browser or machine may not support it.")
+  }
+
+  canvas.addEventListener("contextmenu", event => event.preventDefault());
+
+  canvas.addEventListener("mousewheel", (event: MouseWheelEvent) => {
+    const vector = camera.getForward();
+    vec3.scale(vector, vector, event.wheelDelta * 0.005);
+    vec3.add(vector, vector, camera.getPosition());
+    camera.setPosition(vector[0], vector[1], vector[2]);
+  });
+
+  canvas.addEventListener("mousemove", (event: MouseEvent) => {
+    if (event.buttons > 0) {
+
+      const dx = event.movementX / document.body.clientWidth;
+      const position = vec3.rotateY(
+        vec3.create(),
+        camera.getPosition(),
+        camera.getLookAt(),
+        dx * 30
+      );
+      camera.setPosition(position[0], position[1], position[2]);
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    applyWindowSize();
+  });
+
+  applyWindowSize()
+}
+
 
 export function release() {
 
 }
 
 export function render() {
+
+  if (!gl) return
 
   gl.clearColor(ambient[0], ambient[1], ambient[2], 1.0);
   gl.clearDepth(1.0);

@@ -46,6 +46,11 @@ class Container extends React.Component {
             this.setState({ error, loading: false })
           })
           .then((value) => {
+
+            if (!value) {
+              value = {}
+            }
+
             this.setState({ controls: { ...this.state.controls, ...value }, loading: false })
           })
       })
@@ -76,6 +81,22 @@ class Container extends React.Component {
     })
   }
 
+  componentDidMount() {
+
+    this.applySetting(async () => {
+      await Demo.create(this.canvas.current)
+
+      this.onRenderFrame()
+
+      await Demo.loadAssets()
+    })
+  }
+
+  componentWillUnmount() {
+
+    Demo.release()
+  }
+
   private onRenderFrame() {
     Demo.render()
     requestAnimationFrame(() => this.onRenderFrame())
@@ -92,22 +113,6 @@ class Container extends React.Component {
       <Slider label="Lights" min={1} max={5} step={1} value={controls.lights} onChange={value => this.onChangeLights(value)} />
       {error && <InlineError error={error} />}
     </div>)
-  }
-
-  componentDidMount() {
-    this.setState({ loading: true })
-
-    Demo.create(this.canvas.current).then(() => {
-
-      this.onRenderFrame()
-
-      this.setState({ loading: false })
-    })
-  }
-
-  componentWillUnmount() {
-
-    Demo.release()
   }
 
   render() {
