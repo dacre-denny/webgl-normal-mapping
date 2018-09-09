@@ -215,7 +215,6 @@ export function loadGeometry(
     indices: number[];
     position: number[];
     texcoord: number[];
-    //tangent: number[];
     normal: number[];
   }
 ) {
@@ -244,15 +243,7 @@ export function loadGeometry(
       return v;
     };
 
-    const v0 = pos(i0);
-    const v1 = pos(i1);
-    const v2 = pos(i2);
-
-    const w0 = tex(i0);
-    const w1 = tex(i1);
-    const w2 = tex(i2);
-
-    const tangent = computeTangent(v0, v1, v2, w0, w1, w2);
+    const tangent = computeTangent(pos(i0), pos(i1), pos(i2), tex(i0), tex(i1), tex(i2));
 
     tangents[i0 * 3 + 0] = tangent[0];
     tangents[i0 * 3 + 1] = tangent[1];
