@@ -55,8 +55,6 @@ let textureNormal: WebGLTexture;
 let normalShader: Shader
 let wireframeShader: Shader;
 
-//let lightCount: number = 1;
-
 let gl: WebGLRenderingContext
 
 function renderLights() {
@@ -115,7 +113,7 @@ function applyWindowSize() {
   camera.setAspectRatio(document.body.clientWidth / document.body.clientHeight);
 }
 
-function renderObject() {
+function renderObject(normalScale: number) {
 
   if (!normalShader || !objectGeometry) return
 
@@ -136,6 +134,7 @@ function renderObject() {
   normalShader.use(gl);
 
   normalShader.updateUniforms(gl, {
+    normalScale: normalScale,
     lights: lights,
     uTextureNormal: textureNormal,
     uTextureColor: textureColor,
@@ -151,7 +150,10 @@ function renderObject() {
   geometry.drawBuffer(gl, objectGeometry);
 }
 
-export async function loadAssets() {
+export async function loadAssets(controls: {
+  geometry: string,
+  lights: number
+}) {
 
   textureColor = await textures.loadTexture(
     gl,
@@ -161,6 +163,8 @@ export async function loadAssets() {
     gl,
     "./textures/EC_Stone_Wall_Normal.jpg"
   );
+
+  lights = getLights(controls.lights)
 
   normalShader = await Shader.create(
     gl,
@@ -184,10 +188,7 @@ export async function loadAssets() {
 
   lightGeometry = geometry.createLight(gl, 0.5);
 
-  const response = await fetch('./geom/cube.json')
-  const sphere = await response.json()
-
-  objectGeometry = geometry.loadGeometry(gl, sphere);
+  await setGeometry(controls.geometry)
 }
 
 export async function create(canvas: HTMLCanvasElement) {
@@ -247,21 +248,13 @@ export function render(controls: {
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-  renderObject();
+  renderObject(controls.normal);
 
   renderLights();
 
   renderAxis();
 
   time += clock.update() * controls.speed;
-}
-
-export function setNormalDepth(depth: number) {
-
-  normalShader.use(gl);
-  normalShader.updateUniforms(gl, {
-    normalScale: depth
-  })
 }
 
 export async function setGeometry(geometryType: string) {
@@ -285,10 +278,6 @@ export function setLightCount(count: number) {
 
     normalShader.release(gl)
     normalShader = shader
-
-    normalShader.updateUniforms(gl, {
-      normalScale: 0.5
-    })
 
   });
 }

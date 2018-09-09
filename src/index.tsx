@@ -62,10 +62,7 @@ class Container extends React.Component {
 
   private onChangeNormal(normal: number) {
 
-    this.doTask(async () => {
-      await Demo.setNormalDepth(normal)
-      return { normal }
-    })
+    this.setState({ controls: { ...this.state.controls, normal } })
   }
 
   private onChangeLights(lights: number) {
@@ -94,9 +91,9 @@ class Container extends React.Component {
     this.doTask(async () => {
       await Demo.create(this.canvas.current)
 
-      await this.onRenderFrame()
+      this.onRenderFrame()
 
-      await Demo.loadAssets()
+      await Demo.loadAssets(this.state.controls)
     })
   }
 
