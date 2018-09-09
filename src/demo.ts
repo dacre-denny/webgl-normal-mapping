@@ -12,34 +12,38 @@ const camera = new Camera();
 camera.setPosition(1, 2, 5);
 camera.setLookAt(0, 0, 0);
 
+function getLights(count: number) {
+  return [
+    {
+      position: vec3.create(),
+      color: vec3.fromValues(0.85, 0.95, 1),
+      range: 0.25
+    },
+    {
+      position: vec3.create(),
+      color: vec3.fromValues(0.35, 0.95, 1),
+      range: 1.0
+    },
+    {
+      position: vec3.create(),
+      color: vec3.fromValues(0.85, 0.45, 0.4),
+      range: 0.5
+    },
+    {
+      position: vec3.create(),
+      color: vec3.fromValues(0.85, 0.4, 0.45),
+      range: 0.5
+    },
+    {
+      position: vec3.create(),
+      color: vec3.fromValues(0.45, 0.85, 0.4),
+      range: 1.5
+    }
+  ].slice(0, count)
+}
+
 const ambient = vec3.fromValues(0.1, 0.1, 0.1);
-let lights = [
-  {
-    position: vec3.create(),
-    color: vec3.fromValues(0.85, 0.95, 1),
-    range: 0.25
-  },
-  {
-    position: vec3.create(),
-    color: vec3.fromValues(0.35, 0.95, 1),
-    range: 1.0
-  },
-  {
-    position: vec3.create(),
-    color: vec3.fromValues(0.85, 0.45, 0.4),
-    range: 0.5
-  },
-  {
-    position: vec3.create(),
-    color: vec3.fromValues(0.85, 0.4, 0.45),
-    range: 0.5
-  },
-  {
-    position: vec3.create(),
-    color: vec3.fromValues(0.45, 0.85, 0.4),
-    range: 1.5
-  }
-];
+let lights: any[] = [];
 
 let axisGeometry: any
 let lightGeometry: any
@@ -51,8 +55,7 @@ let textureNormal: WebGLTexture;
 let normalShader: Shader
 let wireframeShader: Shader;
 
-let animationSpeed: number = 1;
-let lightCount: number = 1;
+//let lightCount: number = 1;
 
 let gl: WebGLRenderingContext
 
@@ -67,9 +70,9 @@ function renderLights() {
     uViewMatrix: camera.getView()
   });
 
-  for (var i = 0; i < lightCount; i++) {
+  for (var i = 0; i < lights.length; i++) {
 
-    const phase = time + 2.0 * Math.PI * (i / lightCount)
+    const phase = time + 2.0 * Math.PI * (i / lights.length)
     const light = lights[i]
 
     vec3.set(
@@ -224,12 +227,16 @@ export async function create(canvas: HTMLCanvasElement) {
   applyWindowSize()
 }
 
-
 export function release() {
 
 }
 
-export function render() {
+export function render(controls: {
+  geometry: string,
+  normal: number,
+  speed: number,
+  lights: number
+}) {
 
   if (!gl) return
 
@@ -246,7 +253,7 @@ export function render() {
 
   renderAxis();
 
-  time += clock.update() * animationSpeed;
+  time += clock.update() * controls.speed;
 }
 
 export function setNormalDepth(depth: number) {
@@ -255,11 +262,6 @@ export function setNormalDepth(depth: number) {
   normalShader.updateUniforms(gl, {
     normalScale: depth
   })
-}
-
-export function setAnimationSpeed(speed: number) {
-
-  animationSpeed = speed;
 }
 
 export async function setGeometry(geometryType: string) {
@@ -279,7 +281,7 @@ export function setLightCount(count: number) {
     ["LIGHTS " + count]
   ).then(shader => {
 
-    lightCount = count
+    lights = getLights(count)
 
     normalShader.release(gl)
     normalShader = shader

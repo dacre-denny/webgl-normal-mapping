@@ -8,29 +8,27 @@ import InlineError from "./components/error";
 
 type GeometryType = "cube" | "sphere"
 
-interface State {
-  error?: Error,
-  loading: boolean,
-  controls: {
-    geometry: GeometryType,
-    normal: number,
-    speed: number,
-    lights: number
-  }
-}
-
 class Container extends React.Component {
 
-  state: State = {
-    error: undefined,
-    loading: false,
+  state: {
+    error?: Error,
+    loading: boolean,
     controls: {
-      geometry: 'cube',
-      normal: 0.5,
-      speed: 1.0,
-      lights: 3
+      geometry: GeometryType,
+      normal: number,
+      speed: number,
+      lights: number
     }
-  }
+  } = {
+      error: undefined,
+      loading: false,
+      controls: {
+        geometry: 'cube',
+        normal: 0.5,
+        speed: 1.0,
+        lights: 3
+      }
+    }
 
   canvas: React.RefObject<HTMLCanvasElement>
 
@@ -40,7 +38,7 @@ class Container extends React.Component {
     this.canvas = React.createRef<HTMLCanvasElement>();
   }
 
-  private applySetting(task: () => Promise<any>) {
+  private doTask(task: () => Promise<any>) {
 
     const { loading } = this.state
 
@@ -64,7 +62,7 @@ class Container extends React.Component {
 
   private onChangeNormal(normal: number) {
 
-    this.applySetting(async () => {
+    this.doTask(async () => {
       await Demo.setNormalDepth(normal)
       return { normal }
     })
@@ -72,7 +70,7 @@ class Container extends React.Component {
 
   private onChangeLights(lights: number) {
 
-    this.applySetting(async () => {
+    this.doTask(async () => {
       await Demo.setLightCount(lights)
       return { lights }
     })
@@ -80,7 +78,7 @@ class Container extends React.Component {
 
   private onChangeGeometry(geometry: string) {
 
-    this.applySetting(async () => {
+    this.doTask(async () => {
       await Demo.setGeometry(geometry)
       return { geometry }
     })
@@ -88,18 +86,15 @@ class Container extends React.Component {
 
   private onChangeAnimation(speed: number) {
 
-    this.applySetting(async () => {
-      await Demo.setAnimationSpeed(speed)
-      return { speed }
-    })
+    this.setState({ controls: { ...this.state.controls, speed } })
   }
 
   componentDidMount() {
 
-    this.applySetting(async () => {
+    this.doTask(async () => {
       await Demo.create(this.canvas.current)
 
-      this.onRenderFrame()
+      await this.onRenderFrame()
 
       await Demo.loadAssets()
     })
@@ -110,8 +105,8 @@ class Container extends React.Component {
     Demo.release()
   }
 
-  private onRenderFrame() {
-    Demo.render()
+  private async onRenderFrame() {
+    await Demo.render(this.state.controls)
     requestAnimationFrame(() => this.onRenderFrame())
   }
 

@@ -1,4 +1,5 @@
 import * as React from "react";
+import "../scss/slider.scss";
 
 export default (props: {
   min: number

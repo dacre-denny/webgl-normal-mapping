@@ -15,7 +15,9 @@ uniform mat4 uProjectionMatrix;
 uniform sampler2D uTextureColor;
 uniform sampler2D uTextureNormal;
 
+#if LIGHTS > 0
 uniform Light lights[LIGHTS];
+#endif
 uniform vec3 ambient;
 uniform float normalScale;
  
@@ -24,14 +26,16 @@ varying vec3 vPosition;
 
 varying vec3 tangentVertexPosition;
 varying vec3 tangentVertexNormal;
+#if LIGHTS > 0
 varying vec3 tangentLightPositions[LIGHTS];
+#endif
 
 varying vec3 tangentViewPosition;
 
 vec3 computeLighting(vec3 viewDirection, vec3 texelNormal) {
   
   vec3 color = vec3(0.0,0.0,0.0);
-
+  #if LIGHTS > 0
   for(int i = 0; i < LIGHTS; i++) {
     
     vec3 lightVec = tangentLightPositions[i].xyz - tangentVertexPosition.xyz;
@@ -47,6 +51,7 @@ vec3 computeLighting(vec3 viewDirection, vec3 texelNormal) {
     
     color += (lights[i].color * diffuse) + vec3(specular);
   }
+  #endif
 
     return color;
 }

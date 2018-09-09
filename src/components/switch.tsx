@@ -1,4 +1,5 @@
 import * as React from "react";
+import "../scss/switch.scss";
 
 export default (props: {
   label: String

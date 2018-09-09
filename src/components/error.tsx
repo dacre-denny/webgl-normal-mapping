@@ -1,4 +1,5 @@
 import * as React from "react";
+import "../scss/error.scss";
 
 export default (props: {
   error: Error

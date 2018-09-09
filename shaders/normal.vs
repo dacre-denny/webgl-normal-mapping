@@ -19,14 +19,18 @@ uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
  
 uniform vec3 uViewPosition;
+#if LIGHTS > 0
 uniform Light lights[LIGHTS];
+#endif
  
 varying vec2 vTextureCoord;
 varying vec3 vPosition;
 
 varying vec3 tangentVertexPosition;
 varying vec3 tangentVertexNormal;
+#if LIGHTS > 0
 varying vec3 tangentLightPositions[LIGHTS];
+#endif
 
 varying vec3 tangentViewPosition;
 
@@ -100,9 +104,11 @@ void main() {
     tangentViewPosition = TBN * vec3(normalInvMatrix * vec4(uViewPosition, 1.0));
     
     // Compute position of each light in tangent space for fragment shader
+    #if LIGHTS > 0
     for(int i = 0; i < LIGHTS; i++) {
         tangentLightPositions[i] = TBN * vec3(normalInvMatrix * vec4(lights[i].position, 1.0));
     }
+    #endif
   
     vTextureCoord = texcoord;
     vPosition = position.xyz;
