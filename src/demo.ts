@@ -6,6 +6,7 @@ import * as geometry from "./geometry";
 import * as clock from "./clock";
 import Camera from "./camera";
 import cube from "./cube";
+import sphere from "./sphere";
 
 let time = 0;
 
@@ -65,7 +66,7 @@ function renderLights() {
     vec3.set(
       lights[i].position,
       Math.sin(phase) * 2,
-      Math.sin(phase + time) * 2,
+      Math.sin(phase + time + i * 1.33) * 2,
       Math.cos(phase) * 2
     );
   }
@@ -106,6 +107,39 @@ function renderAxis() {
 
 function applyWindowSize() {
   camera.setAspectRatio(document.body.clientWidth / document.body.clientHeight);
+}
+
+function renderObject() {
+  const rotationMatrix = mat4.fromZRotation(mat4.create(), time);
+
+  const translationMatrix = mat4.fromTranslation(mat4.create(), [
+    0,
+    Math.sin(time),
+    0
+  ]);
+
+  const worldMatrix = mat4.multiply(
+    mat4.create(),
+    translationMatrix,
+    rotationMatrix
+  );
+
+  normalShader.use(gl);
+
+  normalShader.updateUniforms(gl, {
+    lights: lights,
+    uTextureNormal: textureNormal,
+    uTextureColor: textureColor,
+    uProjectionMatrix: camera.getProjection(),
+    uViewMatrix: camera.getView(),
+    uViewPosition: camera.getPosition(),
+    uWorldMatrix: worldMatrix,
+    ambient: ambient
+  });
+
+  geometry.bindBufferAndProgram(gl, normalShader, objectGeometry);
+
+  geometry.drawBuffer(gl, objectGeometry);
 }
 
 export async function create(canvas: HTMLCanvasElement) {
@@ -175,42 +209,9 @@ export async function create(canvas: HTMLCanvasElement) {
 
   lightGeometry = geometry.createLight(gl, 0.5);
 
-  objectGeometry = geometry.loadGeometry(gl, cube);
+  objectGeometry = geometry.loadGeometry(gl, sphere);
 }
 
-
-function renderObject() {
-  const rotationMatrix = mat4.fromZRotation(mat4.create(), time);
-
-  const translationMatrix = mat4.fromTranslation(mat4.create(), [
-    0,
-    Math.sin(time),
-    0
-  ]);
-
-  const worldMatrix = mat4.multiply(
-    mat4.create(),
-    translationMatrix,
-    rotationMatrix
-  );
-
-  normalShader.use(gl);
-
-  normalShader.updateUniforms(gl, {
-    lights: lights,
-    uTextureNormal: textureNormal,
-    uTextureColor: textureColor,
-    uProjectionMatrix: camera.getProjection(),
-    uViewMatrix: camera.getView(),
-    uViewPosition: camera.getPosition(),
-    uWorldMatrix: worldMatrix,
-    ambient: ambient
-  });
-
-  geometry.bindBufferAndProgram(gl, normalShader, objectGeometry);
-
-  geometry.drawBuffer(gl, objectGeometry);
-}
 
 export function release() {
 
@@ -247,36 +248,21 @@ export function setAnimationSpeed(speed: number) {
   animationSpeed = speed;
 }
 
-var loading = false;
-
 export function setLightCount(count: number) {
 
-  // lights = []
+  return Shader.create(
+    gl,
+    "./shaders/normal.vs",
+    "./shaders/normal.fs",
+    ["LIGHTS " + count]
+  ).then(shader => {
 
-  // for (var i = 0; i < count; i++) {
-  //   lights.push({
-  //     position: vec3.fromValues(2, 1, 2),
-  //     color: vec3.fromValues(Math.sin(i * 0.1), Math.sin(i * 0.3), Math.cos(i * 0.1)),
-  //     range: 0.5
-  //   })
-  // }
+    normalShader.release(gl)
+    normalShader = shader
 
-  if (!loading) {
-    loading = true;
-    Shader.create(
-      gl,
-      "./shaders/normal.vs",
-      "./shaders/normal.fs",
-      ["LIGHTS " + count]
-    ).then(shader => {
+    normalShader.updateUniforms(gl, {
+      normalScale: 0.5
+    })
 
-      normalShader.release(gl)
-      normalShader = shader
-
-      normalShader.updateUniforms(gl, {
-        normalScale: 0.5
-      })
-      loading = true
-    });
-  }
+  });
 }
