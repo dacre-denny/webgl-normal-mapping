@@ -35,6 +35,8 @@ class Container extends React.Component {
   constructor(props: any) {
     super(props);
 
+    document.title = "Normal Mapping"
+
     this.canvas = React.createRef<HTMLCanvasElement>();
   }
 
@@ -129,4 +131,4 @@ class Container extends React.Component {
   }
 }
 
-ReactDOM.render(<Container />, document.getElementById("app"));
+ReactDOM.render(<Container />, document.getElementById("container"));
