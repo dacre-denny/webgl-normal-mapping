@@ -26,6 +26,10 @@ module.exports = {
         from: './textures/**.*',
         to: './textures/[name].[ext]'
       },
+      {
+        from: './geom/**.*',
+        to: './geom/[name].[ext]'
+      },
     ], {
       debug: 'error'
     }),

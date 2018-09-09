@@ -1,12 +1,10 @@
 import "./scss/index.scss";
 import { mat4, vec3 } from "gl-matrix";
-import Shader from "./shader";
-import * as textures from "./texture";
-import * as geometry from "./geometry";
+import Shader from "./webgl/shader";
+import * as textures from "./webgl/texture";
+import * as geometry from "./webgl/geometry";
 import * as clock from "./clock";
-import Camera from "./camera";
-import cube from "./cube";
-import sphere from "./sphere";
+import Camera from "./webgl/camera";
 
 let time = 0;
 
@@ -208,6 +206,9 @@ export async function create(canvas: HTMLCanvasElement) {
   axisGeometry = geometry.createAxis(gl);
 
   lightGeometry = geometry.createLight(gl, 0.5);
+
+  const response = await fetch('./geom/sphere.json')
+  const sphere = await response.json()
 
   objectGeometry = geometry.loadGeometry(gl, sphere);
 }

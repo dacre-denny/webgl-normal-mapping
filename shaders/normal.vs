@@ -77,9 +77,8 @@ mat3 transpose(mat3 m) {
               m[0][2], m[1][2], m[2][2]);
 }
 
-void main() { 
-
-    mat4 normalInvMatrix = inverse(uWorldMatrix);
+mat3 computeTBN() {
+    
     mat3 normalMatrix = transpose(mat3(uWorldMatrix));
     vec3 T = normalize( tangent);
     vec3 N = normalize( normal);  
@@ -88,16 +87,22 @@ void main() {
     
     vec3 B = cross(N, T);
     
-    mat3 TBN = transpose(mat3(T,B,N));    
-    // tangentLightPosition = TBN * vec3(normalInvMatrix * vec4(0.0,0.0,0.0, 1.0));
+    return transpose(mat3(T,B,N));   
+}
 
-    for(int i = 0; i < LIGHTS; i++) {
-        tangentLightPositions[i] = TBN * vec3(normalInvMatrix * vec4(lights[i].position, 1.0));
-    }
+void main() { 
+
+    mat4 normalInvMatrix = inverse(uWorldMatrix);
+    mat3 TBN = computeTBN();    
 
     tangentVertexPosition = TBN * position.xyz;
     tangentVertexNormal = TBN * normal;
     tangentViewPosition = TBN * vec3(normalInvMatrix * vec4(uViewPosition, 1.0));
+    
+    // Compute position of each light in tangent space for fragment shader
+    for(int i = 0; i < LIGHTS; i++) {
+        tangentLightPositions[i] = TBN * vec3(normalInvMatrix * vec4(lights[i].position, 1.0));
+    }
   
     vTextureCoord = texcoord;
     vPosition = position.xyz;

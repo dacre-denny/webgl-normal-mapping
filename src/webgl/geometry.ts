@@ -211,33 +211,36 @@ export function createLight(gl: WebGLRenderingContext, radius: number = 1) {
 
 export function loadGeometry(
   gl: WebGLRenderingContext,
-  cube: {
+  geometry: {
     indices: number[];
     position: number[];
     texcoord: number[];
-    tangent: number[];
+    //tangent: number[];
     normal: number[];
   }
 ) {
-  for (var i = 0; i < cube.indices.length; i += 3) {
-    const i0 = cube.indices[i + 0];
-    const i1 = cube.indices[i + 1];
-    const i2 = cube.indices[i + 2];
+
+  const tangents = []
+
+  for (var i = 0; i < geometry.indices.length; i += 3) {
+    const i0 = geometry.indices[i + 0];
+    const i1 = geometry.indices[i + 1];
+    const i2 = geometry.indices[i + 2];
 
     const pos = (idx: number) => {
       const v = vec3.create();
       vec3.set(
         v,
-        cube.position[idx * 3 + 0],
-        cube.position[idx * 3 + 1],
-        cube.position[idx * 3 + 2]
+        geometry.position[idx * 3 + 0],
+        geometry.position[idx * 3 + 1],
+        geometry.position[idx * 3 + 2]
       );
       return v;
     };
 
     const tex = (idx: number) => {
       const v = vec2.create();
-      vec2.set(v, cube.texcoord[idx * 2 + 0], cube.texcoord[idx * 2 + 1]);
+      vec2.set(v, geometry.texcoord[idx * 2 + 0], geometry.texcoord[idx * 2 + 1]);
       return v;
     };
 
@@ -251,17 +254,17 @@ export function loadGeometry(
 
     const tangent = computeTangent(v0, v1, v2, w0, w1, w2);
 
-    cube.tangent[i0 * 3 + 0] = tangent[0];
-    cube.tangent[i0 * 3 + 1] = tangent[1];
-    cube.tangent[i0 * 3 + 2] = tangent[2];
+    tangents[i0 * 3 + 0] = tangent[0];
+    tangents[i0 * 3 + 1] = tangent[1];
+    tangents[i0 * 3 + 2] = tangent[2];
 
-    cube.tangent[i1 * 3 + 0] = tangent[0];
-    cube.tangent[i1 * 3 + 1] = tangent[1];
-    cube.tangent[i1 * 3 + 2] = tangent[2];
+    tangents[i1 * 3 + 0] = tangent[0];
+    tangents[i1 * 3 + 1] = tangent[1];
+    tangents[i1 * 3 + 2] = tangent[2];
 
-    cube.tangent[i2 * 3 + 0] = tangent[0];
-    cube.tangent[i2 * 3 + 1] = tangent[1];
-    cube.tangent[i2 * 3 + 2] = tangent[2];
+    tangents[i2 * 3 + 0] = tangent[0];
+    tangents[i2 * 3 + 1] = tangent[1];
+    tangents[i2 * 3 + 2] = tangent[2];
   }
 
   return createInterleavedBuffer(
@@ -269,21 +272,21 @@ export function loadGeometry(
     {
       position: {
         components: 3,
-        data: cube.position
+        data: geometry.position
       },
       normal: {
         components: 3,
-        data: cube.normal
+        data: geometry.normal
       },
       texcoord: {
         components: 2,
-        data: cube.texcoord
+        data: geometry.texcoord
       },
       tangent: {
         components: 3,
-        data: cube.tangent
+        data: tangents
       }
     },
-    cube.indices
+    geometry.indices
   );
 }

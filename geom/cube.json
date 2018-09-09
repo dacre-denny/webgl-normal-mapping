@@ -1,5 +1,5 @@
-export default {
-  position: [
+{
+  "position": [
     1,
     1,
     -1,
@@ -73,7 +73,7 @@ export default {
     -1,
     -1
   ],
-  normal: [
+  "normal": [
     1,
     0,
     0,
@@ -147,7 +147,7 @@ export default {
     0,
     -1
   ],
-  tangent: [
+  "tangent": [
     0,
     0,
     -1,
@@ -221,7 +221,7 @@ export default {
     0,
     0
   ],
-  texcoord: [
+  "texcoord": [
     1,
     0,
     0,
@@ -271,7 +271,7 @@ export default {
     1,
     1
   ],
-  indices: [
+  "indices": [
     0,
     1,
     2,
@@ -309,4 +309,4 @@ export default {
     22,
     23
   ]
-};
+}

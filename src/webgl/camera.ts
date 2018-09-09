@@ -1,5 +1,5 @@
 import { mat4, vec3 } from "gl-matrix";
-import * as helpers from "./helpers";
+import * as helpers from "../helpers";
 
 export default class Camera {
 

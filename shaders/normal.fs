@@ -48,7 +48,7 @@ vec3 computeLighting(vec3 viewDirection, vec3 texelNormal) {
     color += (lights[i].color * diffuse) + vec3(specular);
   }
 
-  return color;
+    return color;
 }
 
 void main() { 
