@@ -54,22 +54,11 @@ let normalShader: Shader
 let wireframeShader: Shader;
 
 let animationSpeed: number = 1;
+let lightCount: number = 1;
 
 let gl: WebGLRenderingContext
 
 function renderLights() {
-
-  for (var i = 0; i < lights.length; i++) {
-
-    const phase = time + 2.0 * Math.PI * (i / lights.length)
-
-    vec3.set(
-      lights[i].position,
-      Math.sin(phase) * 2,
-      Math.sin(phase + time + i * 1.33) * 2,
-      Math.cos(phase) * 2
-    );
-  }
 
   wireframeShader.use(gl);
 
@@ -78,7 +67,18 @@ function renderLights() {
     uViewMatrix: camera.getView()
   });
 
-  for (const light of lights) {
+  for (var i = 0; i < lightCount; i++) {
+
+    const phase = time + 2.0 * Math.PI * (i / lightCount)
+    const light = lights[i]
+
+    vec3.set(
+      light.position,
+      Math.sin(phase) * 2,
+      Math.sin(phase + time + i * 1.33) * 2,
+      Math.cos(phase) * 2
+    );
+
     const lightTranslation = mat4.create();
     mat4.fromTranslation(lightTranslation, light.position);
 
@@ -256,6 +256,8 @@ export function setLightCount(count: number) {
     "./shaders/normal.fs",
     ["LIGHTS " + count]
   ).then(shader => {
+
+    lightCount = count
 
     normalShader.release(gl)
     normalShader = shader
