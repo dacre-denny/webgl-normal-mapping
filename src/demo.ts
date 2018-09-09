@@ -233,10 +233,8 @@ export function release() {
 }
 
 export function render(controls: {
-  geometry: string,
   normal: number,
-  speed: number,
-  lights: number
+  speed: number
 }) {
 
   if (!gl) return

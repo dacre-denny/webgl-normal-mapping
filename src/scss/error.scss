@@ -1,10 +1,12 @@
+@import "./theme";
+
 .error {
     color: #fff;
     font-size: 0.75rem;
     font-family: 'Montserrat', sans-serif;
     padding: 0.25rem;
     position: relative;
-    background: #da1064;
+    background: $col-foreground-alt;
     border-radius: 2px;
 
     p {
